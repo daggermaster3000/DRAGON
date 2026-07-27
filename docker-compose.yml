@@ -1,0 +1,38 @@
+# Raspberry Pi: `docker compose up -d` brings up everything.
+# First time only, pull the local model:
+#   docker compose exec ollama ollama pull llama3.2
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data          # SQLite DB + backups persist here
+    depends_on:
+      - ollama
+
+  # Local, private LLM classification. Nothing leaves the Pi.
+  # Comment this service out (and set AI_PROVIDER=rules) to run AI-free.
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+    # Expose only if you want to reach Ollama directly from the LAN:
+    # ports:
+    #   - "11434:11434"
+
+  # Nightly SQLite backup into ./data/backups (keeps last 14).
+  backup:
+    image: alpine:3.20
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+      - ./backup.sh:/backup.sh:ro
+    entrypoint: ["/bin/sh", "/backup.sh"]
+
+volumes:
+  ollama-models:

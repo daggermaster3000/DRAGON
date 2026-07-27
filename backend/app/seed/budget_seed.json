@@ -1,0 +1,675 @@
+{
+  "expense_categories": [
+    {
+      "category": "Housing",
+      "monthly_budget": 1430.0,
+      "subcategories": [
+        {
+          "name": "Rent",
+          "monthly_budget": 1110.0
+        },
+        {
+          "name": "Prepaid supplementary rental costs",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Balance of supplementary rental costs",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Electricity",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Household insurance",
+          "monthly_budget": 320.0
+        },
+        {
+          "name": "Security deposit insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Mortgage interest",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Supplemental costs / running expenses",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Maintenance and smaller repairs",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Buildings insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Amortisation",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Health and personal care",
+      "monthly_budget": 411.15,
+      "subcategories": [
+        {
+          "name": "Mandatory health insurance",
+          "monthly_budget": 371.35
+        },
+        {
+          "name": "Supplemental health insurance",
+          "monthly_budget": 39.8
+        },
+        {
+          "name": "Dental care",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Personal hygiene",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Hairdresser",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Contact lenses",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Cosmetics, manicures, pedicures",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Mobility",
+      "monthly_budget": 175.0,
+      "subcategories": [
+        {
+          "name": "Public transportation passes",
+          "monthly_budget": 175.0
+        },
+        {
+          "name": "Public transportation Half-Fare Card",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Public transportation single tickets",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Taxis, Uber",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Mofa, e-bike, bicycle",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Car and motorcycle",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Servicing",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Car insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Leasing rates",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Parking",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Road taxes",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Groceries",
+      "monthly_budget": 450.0,
+      "subcategories": [
+        {
+          "name": "Groceries and beverages",
+          "monthly_budget": 350.0
+        },
+        {
+          "name": "Dining out (restaurants, canteens)",
+          "monthly_budget": 100.0
+        },
+        {
+          "name": "Home food deliveries",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Alcoholic beverages",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Clothing and shoes",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Clothing",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Shoes",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Communication and entertainment",
+      "monthly_budget": 40.83,
+      "subcategories": [
+        {
+          "name": "Mobile plans, prepaid mobile",
+          "monthly_budget": 12.95
+        },
+        {
+          "name": "Home Internet plan",
+          "monthly_budget": 13.3
+        },
+        {
+          "name": "Streaming and TV plans",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Landline telephone plan",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Mobile roaming charges",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Media subscriptions",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Serafe fee",
+          "monthly_budget": 14.58
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Education and continuing education",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "School fees",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Educational material (books, software, ...)",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Leisure and holidays",
+      "monthly_budget": 325.0,
+      "subcategories": [
+        {
+          "name": "Events, clubs, bars, cinemas",
+          "monthly_budget": 100.0
+        },
+        {
+          "name": "Sports",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Hobbies",
+          "monthly_budget": 100.0
+        },
+        {
+          "name": "Holidays and excursions",
+          "monthly_budget": 125.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Pets",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Veterinary care",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Pet insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Food",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Insurance",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Personal liability insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Legal insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Travel insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Life insurance",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other insurances",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Taxes",
+      "monthly_budget": 356.7,
+      "subcategories": [
+        {
+          "name": "Federal income tax",
+          "monthly_budget": 17.08
+        },
+        {
+          "name": "Cantonal and municipal taxes",
+          "monthly_budget": 337.62
+        },
+        {
+          "name": "Military exemption penalty",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 2.0
+        }
+      ]
+    },
+    {
+      "category": "Debts",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Repayments of personal loans",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Repayments of credit card loans",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other debts",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Reserves",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Car, motorcycle, mofa, e-bike, bicycle",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Property",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Healthcare",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Household appliances and furniture",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Education and continuing education",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Computers, mobile phones",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other reserves",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Other",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Consumer goods",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Bank fees",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Alimony and child support",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Software for personal use",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Cigarettes",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Gifts",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Social investments (donations)",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Memberships",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Savings / investments / retirement",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other expenses",
+          "monthly_budget": 0.0
+        }
+      ]
+    }
+  ],
+  "income_categories": [
+    {
+      "category": "Erwerbseinkommen",
+      "monthly_budget": 3950.0,
+      "subcategories": [
+        {
+          "name": "Net salary",
+          "monthly_budget": 3750.0
+        },
+        {
+          "name": "13th monthly salary (net)",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Supplmental income (net)",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other income",
+          "monthly_budget": 200.0
+        }
+      ]
+    },
+    {
+      "category": "Sozialversicherungen",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "OASI or DI pension",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Occupational pension fund pensions",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Withdrawals from the pillar 3a and 3b",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Unemployment benefits",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Parental and military leave benefits",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other income",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Kapitalanlagen",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Interest",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Dividends",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Rents collected",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other income",
+          "monthly_budget": 0.0
+        }
+      ]
+    },
+    {
+      "category": "Übriges",
+      "monthly_budget": 0.0,
+      "subcategories": [
+        {
+          "name": "Alimony and child support",
+          "monthly_budget": 0.0
+        },
+        {
+          "name": "Other income",
+          "monthly_budget": 0.0
+        }
+      ]
+    }
+  ],
+  "bank_category_map": {
+    "Courses": "Groceries",
+    "Restauration": "Groceries",
+    "Loyer et hypothèque": "Housing",
+    "Amélioration de l'habitat": "Housing",
+    "Voiture": "Car and motorcycle",
+    "Transports publics": "Mobility",
+    "Loisirs": "Leisure and holidays",
+    "Voyages": "Leisure and holidays",
+    "Soins personnels": "Health and personal care",
+    "Pharmacie et droguerie": "Health and personal care",
+    "Médecins et services de santé": "Health and personal care",
+    "Assurance-maladie": "Health and personal care",
+    "Impôts": "Taxes",
+    "Shopping": "Other",
+    "Services": "Communication and entertainment",
+    "Général": null,
+    "Paiements": null,
+    "Retraits": "Other",
+    "Remboursements": "Other",
+    "Épargne et placements": "Reserves",
+    "Salaire": "Erwerbseinkommen",
+    "Autres revenus": "Übriges"
+  },
+  "merchant_rules": [
+    {
+      "contains": "migros",
+      "category": "Groceries",
+      "subcategory": "Groceries and beverages"
+    },
+    {
+      "contains": "coop",
+      "category": "Groceries",
+      "subcategory": "Groceries and beverages"
+    },
+    {
+      "contains": "denner",
+      "category": "Groceries",
+      "subcategory": "Groceries and beverages"
+    },
+    {
+      "contains": "lidl",
+      "category": "Groceries",
+      "subcategory": "Groceries and beverages"
+    },
+    {
+      "contains": "aldi",
+      "category": "Groceries",
+      "subcategory": "Groceries and beverages"
+    },
+    {
+      "contains": "mensa",
+      "category": "Groceries",
+      "subcategory": "Dining out (restaurants, canteens)"
+    },
+    {
+      "contains": "cafeteria",
+      "category": "Groceries",
+      "subcategory": "Dining out (restaurants, canteens)"
+    },
+    {
+      "contains": "restaurant",
+      "category": "Groceries",
+      "subcategory": "Dining out (restaurants, canteens)"
+    },
+    {
+      "contains": "mcdonald",
+      "category": "Groceries",
+      "subcategory": "Dining out (restaurants, canteens)"
+    },
+    {
+      "contains": "popeyes",
+      "category": "Groceries",
+      "subcategory": "Dining out (restaurants, canteens)"
+    },
+    {
+      "contains": "sbb",
+      "category": "Mobility",
+      "subcategory": "Public transportation single tickets"
+    },
+    {
+      "contains": "cff",
+      "category": "Mobility",
+      "subcategory": "Public transportation single tickets"
+    },
+    {
+      "contains": "zvv",
+      "category": "Mobility",
+      "subcategory": "Public transportation passes"
+    },
+    {
+      "contains": "swisscom",
+      "category": "Communication and entertainment",
+      "subcategory": "Mobile plans, prepaid mobile"
+    },
+    {
+      "contains": "salt",
+      "category": "Communication and entertainment",
+      "subcategory": "Mobile plans, prepaid mobile"
+    },
+    {
+      "contains": "sunrise",
+      "category": "Communication and entertainment",
+      "subcategory": "Mobile plans, prepaid mobile"
+    },
+    {
+      "contains": "netflix",
+      "category": "Communication and entertainment",
+      "subcategory": "Streaming and TV plans"
+    },
+    {
+      "contains": "spotify",
+      "category": "Communication and entertainment",
+      "subcategory": "Streaming and TV plans"
+    },
+    {
+      "contains": "serafe",
+      "category": "Communication and entertainment",
+      "subcategory": "Serafe fee"
+    },
+    {
+      "contains": "pharmacie",
+      "category": "Health and personal care",
+      "subcategory": "Personal hygiene"
+    },
+    {
+      "contains": "apotheke",
+      "category": "Health and personal care",
+      "subcategory": "Personal hygiene"
+    }
+  ]
+}

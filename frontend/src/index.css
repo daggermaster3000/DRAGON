@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: #f9f9f7;
+  color: #0b0b0b;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Pixel-art crispness for sprite canvases/images. */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}

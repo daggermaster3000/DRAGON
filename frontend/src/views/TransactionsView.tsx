@@ -117,32 +117,36 @@ export function TransactionsView({ refreshKey }: { refreshKey: number }) {
         ) : (
           <ul className="divide-y divide-black/5">
             {txns.map((t) => (
-              <li key={t.id} className={`flex items-center gap-2 px-3 py-2.5 ${sel.has(t.id) ? "bg-ink/5" : ""}`}>
-                <input type="checkbox" checked={sel.has(t.id)} onChange={() => toggle(t.id)} className="shrink-0" />
-                <div className="w-11 shrink-0 text-xs text-ink-muted tabular-nums">{t.date.slice(5)}</div>
+              <li key={t.id} className={`flex items-start gap-2 px-3 py-2.5 ${sel.has(t.id) ? "bg-ink/5" : ""}`}>
+                <input type="checkbox" checked={sel.has(t.id)} onChange={() => toggle(t.id)} className="mt-1 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm text-ink">
-                    {t.payee || "—"}
-                    {t.split_parent_id != null && <span className="ml-1 text-[10px] text-ink-muted">(split)</span>}
+                  {/* line 1: payee + amount */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                      {t.payee || "—"}
+                      {t.split_parent_id != null && <span className="ml-1 text-[10px] text-ink-muted">(split)</span>}
+                    </span>
+                    <span className={`shrink-0 text-sm tabular-nums ${t.amount >= 0 ? "text-hp-good" : "text-ink"}`}>
+                      {t.amount >= 0 ? "+" : ""}{CHF(t.amount)}
+                    </span>
                   </div>
-                  <div className="mt-0.5 flex items-center gap-1.5">
-                    <span className={`rounded px-1.5 py-0.5 text-[10px] ${CLS_BADGE[t.classified_by] || "bg-black/5"}`}>{t.classified_by}</span>
-                    {t.needs_review && <span className="text-[10px] text-hp-warn">● review</span>}
+                  {/* line 2: date · status · category · split */}
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="shrink-0 text-[10px] text-ink-muted tabular-nums">{t.date.slice(5)}</span>
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] ${CLS_BADGE[t.classified_by] || "bg-black/5"}`}>{t.classified_by}</span>
+                    {t.needs_review && <span className="shrink-0 text-[10px] text-hp-warn">●</span>}
+                    <select
+                      value={t.category_id ?? ""}
+                      onChange={(e) => changeCategory(t.id, Number(e.target.value))}
+                      className="min-w-0 flex-1 rounded-md border border-black/10 bg-white px-2 py-1 text-xs text-ink-soft"
+                    >
+                      <option value="" disabled>Uncategorized</option>
+                      {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                    {t.split_parent_id == null && (
+                      <button onClick={() => setSplitTxn(t)} className="shrink-0 px-1 text-ink-muted hover:text-ink" title="Split">⑃</button>
+                    )}
                   </div>
-                </div>
-                <select
-                  value={t.category_id ?? ""}
-                  onChange={(e) => changeCategory(t.id, Number(e.target.value))}
-                  className="max-w-[34vw] shrink-0 rounded-md border border-black/10 bg-white px-2 py-1 text-xs text-ink-soft sm:max-w-[160px]"
-                >
-                  <option value="" disabled>Uncategorized</option>
-                  {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-                {t.split_parent_id == null && (
-                  <button onClick={() => setSplitTxn(t)} className="shrink-0 text-xs text-ink-muted hover:text-ink" title="Split">⑃</button>
-                )}
-                <div className={`w-[70px] shrink-0 text-right text-sm tabular-nums ${t.amount >= 0 ? "text-hp-good" : "text-ink"}`}>
-                  {t.amount >= 0 ? "+" : ""}{CHF(t.amount)}
                 </div>
               </li>
             ))}

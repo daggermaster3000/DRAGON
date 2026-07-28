@@ -38,8 +38,8 @@ class MistralProvider:
         except Exception:
             return [None] * len(payees)
 
-    def generate(self, prompt: str, temperature: float = 0.9) -> str | None:
+    def generate(self, prompt: str, temperature: float = 0.9, max_tokens: int = 200) -> str | None:
         try:
-            return self._chat(prompt, temperature, 200)
+            return self._chat(prompt, temperature, max_tokens)
         except Exception:
             return None

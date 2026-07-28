@@ -40,7 +40,7 @@ class OpenAIProvider:
         except Exception:
             return [None] * len(payees)
 
-    def generate(self, prompt: str, temperature: float = 0.9) -> str | None:
+    def generate(self, prompt: str, temperature: float = 0.9, max_tokens: int = 200) -> str | None:
         try:
             r = httpx.post(
                 "https://api.openai.com/v1/chat/completions",
@@ -48,7 +48,7 @@ class OpenAIProvider:
                 json={
                     "model": self.model,
                     "temperature": temperature,
-                    "max_tokens": 90,
+                    "max_tokens": max_tokens,
                     "messages": [{"role": "user", "content": prompt}],
                 },
                 timeout=self.timeout,

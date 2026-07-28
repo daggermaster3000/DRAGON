@@ -107,11 +107,11 @@ def _fallback_batch(s: dict, n: int) -> list[str]:
 
 
 def _generate_batch(db: Session, s: dict) -> dict:
-    provider = build_provider()
+    provider = build_provider(db)
     quips: list[str] = []
     source = "fallback"
     if provider is not None and provider.available():
-        text = provider.generate(_batch_prompt(s, BATCH_SIZE))
+        text = provider.generate(_batch_prompt(s, BATCH_SIZE), max_tokens=400)
         if text:
             quips = _parse_lines(text, BATCH_SIZE)
             if len(quips) >= 2:

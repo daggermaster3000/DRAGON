@@ -156,13 +156,16 @@ def _align(raw: dict, cats: list[Category]) -> list[dict]:
 def propose(inp: OracleInput, db: Session = Depends(get_db)):
     cats = _catalogue(db)
     observed = _observed_monthly(db)
-    provider = build_provider()
+    provider = build_provider(db)
 
     raw: dict | None = None
     rationale = ""
     source = "fallback"
     if provider is not None and provider.available():
-        text = provider.generate(_prompt(inp, cats, observed), temperature=0.4)
+        # The oracle returns a large JSON budget — needs a generous token ceiling,
+        # or the response truncates and JSON parsing fails (was silently falling
+        # back to the heuristic).
+        text = provider.generate(_prompt(inp, cats, observed), temperature=0.4, max_tokens=3000)
         if text:
             try:
                 data = json.loads(text[text.index("{"): text.rindex("}") + 1])

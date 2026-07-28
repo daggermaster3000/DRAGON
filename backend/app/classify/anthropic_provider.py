@@ -47,8 +47,8 @@ class AnthropicProvider:
         except Exception:
             return [None] * len(payees)
 
-    def generate(self, prompt: str, temperature: float = 0.9) -> str | None:
+    def generate(self, prompt: str, temperature: float = 0.9, max_tokens: int = 200) -> str | None:
         try:
-            return self._message(prompt, max_tokens=200, temperature=temperature)
+            return self._message(prompt, max_tokens=max_tokens, temperature=temperature)
         except Exception:
             return None

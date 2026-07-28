@@ -16,6 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..ai_settings import get_ai_config
+from ..config import get_settings
 from ..models import BankCategoryMap, Category, MerchantRule, Transaction
 from .anthropic_provider import AnthropicProvider
 from .mistral_provider import MistralProvider

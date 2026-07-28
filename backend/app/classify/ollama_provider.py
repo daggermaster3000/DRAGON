@@ -41,12 +41,12 @@ class OllamaProvider:
         except Exception:
             return [None] * len(payees)
 
-    def generate(self, prompt: str, temperature: float = 0.8) -> str | None:
+    def generate(self, prompt: str, temperature: float = 0.8, max_tokens: int = 200) -> str | None:
         try:
             r = httpx.post(
                 f"{self.base_url}/api/generate",
                 json={"model": self.model, "prompt": prompt, "stream": False,
-                      "options": {"temperature": temperature}},
+                      "options": {"temperature": temperature, "num_predict": max_tokens}},
                 timeout=self.timeout,
             )
             r.raise_for_status()

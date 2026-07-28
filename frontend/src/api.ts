@@ -292,6 +292,9 @@ export const api = {
       body: JSON.stringify({ subcategories }),
     }).then(json<Category>),
 
+  resetBudget: () =>
+    fetch("/api/categories/reset-budget", { method: "POST" }).then(json<{ updated: number; created: number }>),
+
   planHealth: () => fetch("/api/health/plan").then(json<PlanHealth>),
 
   achievements: () =>

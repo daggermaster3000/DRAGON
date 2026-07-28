@@ -79,3 +79,33 @@ def _seed(db: Session) -> None:
         db.add(DragonState(id=1, stage="baby", mood="idle", xp=0))
 
     db.commit()
+
+
+def reset_budget(db: Session) -> dict:
+    """Re-apply the Budget-Tool defaults to categories: update budgets +
+    subcategories for existing categories (by name, keeping their id so
+    transaction links survive), create any missing ones. Custom user-added
+    categories are left untouched. Does not touch transactions or rules."""
+    seed = json.loads(SEED_PATH.read_text(encoding="utf-8"))
+    by_name = {c.name: c for c in db.scalars(select(Category)).all()}
+
+    updated = created = 0
+    order = 0
+    for kind, key in (("expense", "expense_categories"), ("income", "income_categories")):
+        for cat in seed.get(key, []):
+            order += 1
+            subs_json = json.dumps(cat.get("subcategories", []), ensure_ascii=False)
+            budget = round(float(cat.get("monthly_budget", 0.0)), 2)
+            existing = by_name.get(cat["category"])
+            if existing:
+                existing.kind = kind
+                existing.monthly_budget = budget
+                existing.subcategories_json = subs_json
+                existing.sort_order = order
+                updated += 1
+            else:
+                db.add(Category(kind=kind, name=cat["category"], monthly_budget=budget,
+                                sort_order=order, subcategories_json=subs_json))
+                created += 1
+    db.commit()
+    return {"updated": updated, "created": created}

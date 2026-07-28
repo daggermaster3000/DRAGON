@@ -49,6 +49,13 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
     onChanged();
   }
 
+  async function resetToDefaults() {
+    if (!confirm("Reset all budgets and line items to your Budget-Tool defaults?\n\nYour transactions and custom categories are kept — only budget amounts and subcategories are restored.")) return;
+    await fail(api.resetBudget());
+    load();
+    onChanged();
+  }
+
   return (
     <div>
       {error && <div className="mb-3"><ErrorBox msg={error} /></div>}
@@ -58,9 +65,17 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
         <Tot label="Expenses / mo" value={CHF(totalExpense)} />
         <Tot label="Planned savings" value={(plannedNet >= 0 ? "+" : "") + CHF(plannedNet)} good={plannedNet >= 0} />
       </div>
-      <p className="mb-4 text-xs text-ink-muted">
-        From your Budget-Tool. Tap a category to edit its line items (incl. Reserves &amp; Savings). A category's total is the sum of its lines.
-      </p>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-ink-muted">
+          From your Budget-Tool. Tap a category to edit its line items (incl. Reserves &amp; Savings). A category's total is the sum of its lines.
+        </p>
+        <button
+          onClick={resetToDefaults}
+          className="shrink-0 rounded-lg border border-black/10 px-3 py-1.5 text-xs text-ink-soft hover:bg-black/5"
+        >
+          ↺ Reset to tool defaults
+        </button>
+      </div>
 
       <h2 className="mb-2 text-sm font-semibold text-ink">Expense categories</h2>
       <div className="mb-4 space-y-2">

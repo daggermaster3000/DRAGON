@@ -11,8 +11,16 @@ from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Category, Transaction
+from ..seed_loader import reset_budget
 
 router = APIRouter(prefix="/api/categories", tags=["categories"])
+
+
+@router.post("/reset-budget")
+def reset_budget_to_defaults(db: Session = Depends(get_db)):
+    """Restore category budgets + subcategories to the Budget-Tool defaults.
+    Keeps transactions, their category links, and custom categories."""
+    return reset_budget(db)
 
 
 class CategoryIn(BaseModel):

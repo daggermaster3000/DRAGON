@@ -65,11 +65,17 @@ export interface Transaction {
   split_parent_id: number | null;
 }
 
+export interface Subcategory {
+  name: string;
+  monthly_budget: number;
+}
+
 export interface Category {
   id: number;
   name: string;
   kind: string;
   monthly_budget: number;
+  subcategories: Subcategory[];
 }
 
 export interface MonthPoint {
@@ -278,6 +284,13 @@ export const api = {
 
   deleteCategory: (id: number) =>
     fetch(`/api/categories/${id}`, { method: "DELETE" }).then(json<{ deleted: number; transactions_detached: number }>),
+
+  setSubcategories: (id: number, subcategories: Subcategory[]) =>
+    fetch(`/api/categories/${id}/subcategories`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subcategories }),
+    }).then(json<Category>),
 
   planHealth: () => fetch("/api/health/plan").then(json<PlanHealth>),
 

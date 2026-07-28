@@ -50,7 +50,14 @@ def dragon(db: Session = Depends(get_db)):
 @router.get("/categories")
 def categories(db: Session = Depends(get_db)):
     cats = db.scalars(select(Category).order_by(Category.kind, Category.sort_order)).all()
-    return [{"id": c.id, "name": c.name, "kind": c.kind, "monthly_budget": c.monthly_budget} for c in cats]
+    return [
+        {
+            "id": c.id, "name": c.name, "kind": c.kind,
+            "monthly_budget": round(c.monthly_budget, 2),
+            "subcategories": json.loads(c.subcategories_json or "[]"),
+        }
+        for c in cats
+    ]
 
 
 @router.get("/budget/{category_id}/detail")

@@ -2,6 +2,8 @@
 delete. (GET /api/categories lives in dashboard.py.)"""
 from __future__ import annotations
 
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func, select
@@ -24,8 +26,21 @@ class CategoryPatch(BaseModel):
     monthly_budget: float | None = None
 
 
+class SubcategoryIn(BaseModel):
+    name: str
+    monthly_budget: float = 0.0
+
+
+class SubcategoriesPatch(BaseModel):
+    subcategories: list[SubcategoryIn]
+
+
 def _out(c: Category) -> dict:
-    return {"id": c.id, "name": c.name, "kind": c.kind, "monthly_budget": round(c.monthly_budget, 2)}
+    return {
+        "id": c.id, "name": c.name, "kind": c.kind,
+        "monthly_budget": round(c.monthly_budget, 2),
+        "subcategories": json.loads(c.subcategories_json or "[]"),
+    }
 
 
 @router.post("")
@@ -63,6 +78,29 @@ def update_category(category_id: int, patch: CategoryPatch, db: Session = Depend
         c.name = new
     if patch.monthly_budget is not None:
         c.monthly_budget = max(0.0, patch.monthly_budget)
+    db.commit()
+    db.refresh(c)
+    return _out(c)
+
+
+@router.put("/{category_id}/subcategories")
+def set_subcategories(category_id: int, patch: SubcategoriesPatch, db: Session = Depends(get_db)):
+    """Replace a category's subcategory line-items. The category's monthly_budget
+    becomes the sum of its subcategory budgets (the tool's model)."""
+    c = db.get(Category, category_id)
+    if not c:
+        raise HTTPException(404, "category not found")
+    # Note: the source budget legitimately repeats names (e.g. "Other expenses"
+    # appears under many categories and even twice in one), so names are NOT
+    # required to be unique. The frontend keys rows by index.
+    subs = []
+    for s in patch.subcategories:
+        name = s.name.strip()
+        if not name:
+            raise HTTPException(422, "subcategory name must not be empty")
+        subs.append({"name": name, "monthly_budget": round(max(0.0, s.monthly_budget), 2)})
+    c.subcategories_json = json.dumps(subs, ensure_ascii=False)
+    c.monthly_budget = round(sum(s["monthly_budget"] for s in subs), 2)
     db.commit()
     db.refresh(c)
     return _out(c)

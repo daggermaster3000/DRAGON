@@ -105,7 +105,14 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
             ))
           )}
         </div>
-        {openCat !== null && <CategoryDetailPanel categoryId={openCat} timeframe={timeframe} onClose={() => setOpenCat(null)} />}
+        {openCat !== null && (
+          <CategoryDetailPanel
+            categoryId={openCat}
+            timeframe={timeframe}
+            onClose={() => setOpenCat(null)}
+            onChanged={() => api.dashboard(sort, timeframe).then(setData).catch(() => {})}
+          />
+        )}
       </section>
 
       <AchievementsGrid refreshKey={refreshKey} />

@@ -7,11 +7,16 @@ export function RulesView({ onReclassified }: { onReclassified: () => void }) {
   const [cats, setCats] = useState<Category[]>([]);
   const [contains, setContains] = useState("");
   const [categoryName, setCategoryName] = useState("");
+  const [subcategory, setSubcategory] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
   const expenseCats = useMemo(() => cats.filter((c) => c.kind === "expense"), [cats]);
+  const subOptions = useMemo(() => {
+    const c = cats.find((x) => x.name === categoryName);
+    return c ? [...new Set(c.subcategories.map((s) => s.name))] : [];
+  }, [cats, categoryName]);
 
   function loadRules() {
     api.rules().then(setRules).catch((e) => setError(e.message));
@@ -31,7 +36,7 @@ export function RulesView({ onReclassified }: { onReclassified: () => void }) {
     setError(null);
     if (!contains.trim() || !categoryName) return;
     try {
-      await api.createRule(contains.trim(), categoryName);
+      await api.createRule(contains.trim(), categoryName, subcategory || undefined);
       setContains("");
       loadRules();
     } catch (err) {
@@ -79,12 +84,24 @@ export function RulesView({ onReclassified }: { onReclassified: () => void }) {
             Category
             <select
               value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
+              onChange={(e) => { setCategoryName(e.target.value); setSubcategory(""); }}
               className="mt-1 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-ink"
             >
               {expenseCats.map((c) => (
                 <option key={c.id} value={c.name}>{c.name}</option>
               ))}
+            </select>
+          </label>
+          <label className="flex-1 min-w-[150px] text-xs text-ink-muted">
+            Subcategory <span className="text-ink-muted">(optional)</span>
+            <select
+              value={subcategory}
+              onChange={(e) => setSubcategory(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-ink"
+              disabled={subOptions.length === 0}
+            >
+              <option value="">— none —</option>
+              {subOptions.map((n) => <option key={n} value={n}>{n}</option>)}
             </select>
           </label>
           <button className="rounded-lg bg-ink px-4 py-2 text-sm font-medium text-white hover:bg-ink/85">Add</button>
@@ -109,7 +126,10 @@ export function RulesView({ onReclassified }: { onReclassified: () => void }) {
             <li key={r.id} className="flex items-center gap-2 px-4 py-2 text-sm">
               <code className="rounded bg-black/5 px-1.5 py-0.5 text-xs text-ink">{r.contains}</code>
               <span className="text-ink-muted">→</span>
-              <span className="flex-1 truncate text-ink-soft">{r.category_name}</span>
+              <span className="flex-1 truncate text-ink-soft">
+                {r.category_name}
+                {r.subcategory && <span className="text-ink-muted"> / {r.subcategory}</span>}
+              </span>
               <span className={`rounded px-1.5 py-0.5 text-[10px] ${r.source === "user" ? "bg-[#7a5cc0]/15 text-[#7a5cc0]" : "bg-black/5 text-ink-muted"}`}>
                 {r.source}
               </span>

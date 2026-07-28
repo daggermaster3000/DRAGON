@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
-from .routes import achievements, categories, dashboard, health, imports, oracle, quip, rules, stats, subscriptions, transactions
+from .routes import achievements, categories, dashboard, health, imports, oracle, quip, rules, settings as settings_route, stats, subscriptions, transactions
 from .seed_loader import init_db
 
 settings = get_settings()
@@ -34,6 +34,7 @@ app.include_router(health.router)
 app.include_router(achievements.router)
 app.include_router(quip.router)
 app.include_router(oracle.router)
+app.include_router(settings_route.router)
 
 
 @app.on_event("startup")

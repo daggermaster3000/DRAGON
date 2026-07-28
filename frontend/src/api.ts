@@ -195,6 +195,22 @@ export interface OracleProposal {
   observed: Record<string, number>;
 }
 
+export interface AiSettings {
+  providers: string[];
+  provider: string;
+  ollama_base_url: string;
+  ollama_model: string;
+  openai_api_key_set: boolean;
+  openai_api_key_hint: string;
+  openai_model: string;
+  anthropic_api_key_set: boolean;
+  anthropic_api_key_hint: string;
+  anthropic_model: string;
+  mistral_api_key_set: boolean;
+  mistral_api_key_hint: string;
+  mistral_model: string;
+}
+
 export type PlanStatus = "on_track" | "watch" | "off_track";
 
 export interface PlanHealth {
@@ -354,6 +370,17 @@ export const api = {
     }).then(json<{ applied: number }>),
 
   planHealth: () => fetch("/api/health/plan").then(json<PlanHealth>),
+
+  getSettings: () => fetch("/api/settings").then(json<AiSettings>),
+
+  updateSettings: (patch: Partial<Record<string, string>>) =>
+    fetch("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    }).then(json<AiSettings>),
+
+  testProvider: () => fetch("/api/settings/test", { method: "POST" }).then(json<{ ok: boolean; provider: string; detail: string }>),
 
   achievements: () =>
     fetch("/api/achievements").then(json<{ achievements: Achievement[]; unlocked: number; total: number; newly_unlocked: string[] }>),

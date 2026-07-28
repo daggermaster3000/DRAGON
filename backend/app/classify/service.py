@@ -15,8 +15,10 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..config import get_settings
+from ..ai_settings import get_ai_config
 from ..models import BankCategoryMap, Category, MerchantRule, Transaction
+from .anthropic_provider import AnthropicProvider
+from .mistral_provider import MistralProvider
 from .ollama_provider import OllamaProvider
 from .openai_provider import OpenAIProvider
 
@@ -24,13 +26,23 @@ from .openai_provider import OpenAIProvider
 REVIEW_AMOUNT_THRESHOLD = 1000.0
 
 
-def build_provider():
-    """Instantiate the configured AI provider, or None for rules-only."""
-    s = get_settings()
-    if s.ai_provider == "ollama":
-        return OllamaProvider(s.ollama_base_url, s.ollama_model)
-    if s.ai_provider == "openai":
-        return OpenAIProvider(s.openai_api_key, s.openai_model)
+def build_provider(db: Session | None = None):
+    """Instantiate the configured AI provider, or None for rules-only. Reads the
+    live config from the DB (Settings tab) when a session is given, else env."""
+    if db is None:
+        from ..db import SessionLocal
+        with SessionLocal() as s:
+            return build_provider(s)
+    c = get_ai_config(db)
+    provider = c["provider"]
+    if provider == "ollama":
+        return OllamaProvider(c["ollama_base_url"], c["ollama_model"])
+    if provider == "openai":
+        return OpenAIProvider(c["openai_api_key"], c["openai_model"])
+    if provider == "anthropic":
+        return AnthropicProvider(c["anthropic_api_key"], c["anthropic_model"])
+    if provider == "mistral":
+        return MistralProvider(c["mistral_api_key"], c["mistral_model"])
     return None  # "rules" or unknown -> deterministic only
 
 

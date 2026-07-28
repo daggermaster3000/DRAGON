@@ -14,12 +14,17 @@ class Settings(BaseSettings):
 
     # Classification
     # Provider default is "rules": deterministic, zero external calls. Set to
-    # "ollama" (local, private) or "openai" (cloud) to enable AI classification.
+    # "ollama" (local), "openai", "anthropic", or "mistral" (cloud) to enable AI.
+    # These are the .env defaults; the Settings tab persists overrides in the DB.
     ai_provider: str = "rules"
     ollama_base_url: str = "http://ollama:11434"
     ollama_model: str = "llama3.2"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
+    anthropic_api_key: str = ""
+    anthropic_model: str = "claude-haiku-4-5"
+    mistral_api_key: str = ""
+    mistral_model: str = "mistral-small-latest"
     # If AI is enabled but unreachable, fall back to rules instead of erroring.
     ai_graceful_fallback: bool = True
 

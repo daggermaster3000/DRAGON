@@ -1,122 +1,136 @@
-// Modular pixel-art sprites. Each sprite is an array of rows; every character
-// is one pixel mapped through PALETTE. The renderer pads ragged rows, but these
-// are uniform per sprite. Add a new pet/dragon by adding a sprite set here;
-// nothing else in the app changes.
-//
-// Sprites designed by a Fable pixel-art pass.
+// Pixel-art dragon sprites — cute curled dragon that grows: baby (sleeping) ->
+// young (+wing) -> adult (+flame) -> legendary (gold + sparkles). Traced from a
+// reference and hand-tuned. Each char maps through PALETTE; renderer pads ragged
+// rows. Add a new pet by adding a sprite set; nothing else changes.
 
 export type Stage = "baby" | "young" | "adult" | "legendary";
 
 export const PALETTE: Record<string, string | null> = {
-  ".": null, // transparent
-  K: "#1a1a1a", // outline
-  g: "#3fae5a", // green body
-  G: "#2b7d40", // green shadow
-  l: "#7fd89a", // green highlight
-  b: "#f0e6c8", // cream belly
-  W: "#7a5cc0", // wing membrane
-  w: "#a98fd8", // wing highlight
-  h: "#d8c48a", // horn / claw / spine (bone)
-  e: "#ffffff", // eye white
-  p: "#1a1a1a", // pupil
+  ".": null,
+  K: "#16233a", // navy outline
+  g: "#3fb24a", // body green
+  G: "#297834", // green shadow
+  l: "#96e06e", // green highlight
+  y: "#f0c450", // gold body (legendary)
+  Y: "#c4962c", // gold shadow
+  m: "#ffe296", // gold highlight
+  W: "#7856c4", // wing membrane
+  w: "#aa8cdc", // wing highlight
   f: "#f5a623", // flame outer
   r: "#e34948", // flame core
-  y: "#f2c14e", // gold body (legendary)
-  Y: "#c9962e", // gold shadow (legendary)
+  s: "#ffeca0", // sparkle
 };
 
 const baby = [
-  ".....h....h.....",
-  "....Kh....hK....",
-  "....KKKKKKKK....",
-  "...KggggggggK...",
-  "..KggeeggeeggK..",
-  "..KggppggppggK..",
-  "...KggggggggK...",
-  "....KggggggK....",
-  ".....KggggK.....",
-  "...KggggggggK...",
-  "...KggbbbbggK...",
-  "..KggbbbbbbggK..",
-  "...KggbbbbggK...",
-  "....KggggggK....",
-  "......KggK......",
-  "..Kb........bK..",
+  "..............KKKKK..........",
+  "..............KKggK..........",
+  "..............KKKKggg........",
+  "..............KKKKKKgg.......",
+  "..........KK...KKKKKKggK.....",
+  ".........gKK...KKKKK...g.....",
+  ".......KgKK...KKKKKK.........",
+  ".......KKK..ggKKgKKKg........",
+  ".....KKKKKggggKKKggggggK.....",
+  "...KKKgggKgggKKKggggggggKK...",
+  "..gKgKKggggKKKKgggKKKggggKK..",
+  "..KKKgKgglgggKKggKggggggggKK.",
+  "..KKKKgggglgggKKKglggggggggK.",
+  "..KKKgggggggggKKKggggggggggKK",
+  ".KKKgggggggggggKggggggggggggK",
+  ".KKggggggggggggKKKgggggKggggK",
+  ".KKggggggggggKgKKKKggggKggggK",
+  ".gggggKggKggggKKKgKgggKKgggg.",
+  "KKKKgggKKKgglgggKKKKKKKgggggK",
+  "KKKKKgggggggKgggKgKKKKglgggKK",
+  "..KKKggggggggggKgKgggggggggK.",
+  "..KgKKKgggggggKKKgggggggggK..",
+  "..KKgggKgKKKKKKKggKgggggKK...",
+  "..KKKgKgKgKKKKK.KKKKKKK......",
+  "....KKKK..KKKK.......K.......",
 ];
 
 const young = [
-  ".......h....h.......",
-  "......Kh....hK......",
-  "....KKKKKKKKKKKK....",
-  "...KggggggggggggK...",
-  "..KggeeggggggeeggK..",
-  "..KggppggggggppggK..",
-  "...KggggggggggggK...",
-  "....KggggggggggK....",
-  ".....KggggggggK.....",
-  "...KggggggggggggK...",
-  ".KWWKggbbbbbbggKWWK.",
-  "KWWWKgbbbbbbbbgKWWWK",
-  ".KwWKgbbbbbbbbgKWwK.",
-  "..KWKgbbbbbbbbgKWK..",
-  "...KggggggggggggK...",
-  ".....Kgh....hgK.....",
-  ".....KhhK..KhhK.....",
-  "........KggK........",
+  "..............KKKKK..........",
+  "..............KKggKKK........",
+  "..............KKKKgWWK.......",
+  "..............KKKKWWWwK......",
+  ".........KKK...KKWWWWwgK.....",
+  "........KgKK...KKKWWwKKgK....",
+  ".......KgKK.KKKKKKKWwK.K.....",
+  ".......KKKKKggKKgKKKgKK......",
+  ".....KKKKKggggKKKggggggK.....",
+  "..KKKKgggKgggKKKggggggggKK...",
+  ".KgKgKKggggKKKKgggKKKggggKK..",
+  "..KKKgKgglgggKKggKggggggggKK.",
+  "..KKKKgggglgggKKKglggggggggK.",
+  "..KKKgggggggggKKKggggggggggKK",
+  ".KKKgggggggggggKggggggggggggK",
+  ".KKggggggggggggKKKgggggKggggK",
+  ".KKggggggggggKgKKKKggggKggggK",
+  "KgggggKggKggggKKKgKgggKKggggK",
+  "KKKKgggKKKgglgggKKKKKKKgggggK",
+  "KKKKKgggggggKgggKgKKKKglgggKK",
+  "..KKKggggggggggKgKgggggggggK.",
+  "..KgKKKgggggggKKKgggggggggK..",
+  "..KKgggKgKKKKKKKggKgggggKK...",
+  "..KKKgKgKgKKKKK.KKKKKKKK.....",
+  "....KKKK.KKKKK.......K.......",
 ];
 
 const adult = [
-  ".........h....h.........",
-  "........Kh....hK........",
-  "....KKKKKKKKKKKKKKKK....",
-  "...KggggggggggggggggK...",
-  "..KggeeggggggggggeeggK..",
-  "..KggppggggggggggppggK..",
-  "...KggggggggggggggggK...",
-  "....KggggggggggggggK....",
-  ".....KggggggggggggK.....",
-  "....fr..KggKKggK..rf....",
-  "......KggggggggggK......",
-  ".....KggggggggggggK.....",
-  "KWWwWKggggggggggggKWwWWK",
-  ".KWwWKgbbbbbbbbbbgKWwWK.",
-  "..KWwWKgbbbbbbbbgKWwWK..",
-  "...KWwWKgbbbbbbgKWwWK...",
-  "....KWKgbbbbbbbbgKWK....",
-  ".....KWKgbbbbbbgKWK.....",
-  "......KgbbbbbbbbgK......",
-  ".......KggggggggK.......",
-  ".....KhhK......KhhK.....",
-  "..........KhhK..........",
+  "..............KKKWWKK........",
+  "..............KKWWWWwK.......",
+  "..............KWWWWWWwK......",
+  "..............KWWWWWWWwK.....",
+  ".........KKK...KWWWWWwgK.....",
+  "........KgKK...KKWWWwKKgK....",
+  ".......KgKK.KKKKKKWWK..K.....",
+  ".......KKKKKggKKgKKKgKK......",
+  ".....KKKKKggggKKKggggggK.....",
+  "..KKKKgggKgggKKKggggggggKK...",
+  ".KgKgKKggggKKKKgggKKKggggKK..",
+  "..KKKgKgglgggKKggKggggggggKK.",
+  "..KKKKgggglgggKKKglggggggggK.",
+  "..KKKgggggggggKKKggggggggggKK",
+  ".KKKgggggggggggKggggggggggggK",
+  ".KKggggggggggggKKKgggggKggggK",
+  ".KKggggggggggKgKKKKggggKggggK",
+  "KgggggKggKggggKKKgKgggKKggggK",
+  "KKKKgggKKKgglgggKKKKKKKgggggK",
+  "KfKKKgggggggKgggKgKKKKglgggKK",
+  "ffKKKggggggggggKgKgggggggggK.",
+  "rfKgKKKgggggggKKKgggggggggK..",
+  "r.KKgggKgKKKKKKKggKgggggKK...",
+  "..KKKgKgKgKKKKK.KKKKKKKK.....",
+  "....KKKK.KKKKK.......K.......",
 ];
 
 const legendary = [
-  "..........h......h..........",
-  ".........Kh......hK.........",
-  "........hKh......hKh........",
-  "....KKKKKKKKKKKKKKKKKKKK....",
-  "...KyyyyyyyyyyyyyyyyyyyyK...",
-  "..KyyeeyyyyyyyyyyyyyyeeyyK..",
-  "..KyyppyyyyyyyyyyyyyyppyyK..",
-  "...KyyyyyyyyyyyyyyyyyyyyK...",
-  "...hKyyyyyyyyyyyyyyyyyyKh...",
-  "....KyyyyyyyyyyyyyyyyyyK....",
-  ".....KyyyyyyyyyyyyyyyyK.....",
-  "...........ffrrff...........",
-  ".........fffrrrrfff.........",
-  "..........ffrrrrff..........",
-  "..........KyyyyyyK..........",
-  ".........KyyyyyyyyK.........",
-  "KWWWwWKyyyyyyyyyyyyyyKWwWWWK",
-  ".KWWwWKybbbbbbbbbbbbyKWwWWK.",
-  ".KhWwWKybbbbbbbbbbbbyKWwWhK.",
-  "..KWwWKybbbbbbbbbbbbyKWwWK..",
-  "...KWWKybbbbbbbbbbbbyKWWK...",
-  "....KWKybbbbbbbbbbbbyKWK....",
-  ".....KybbbbbbbbbbbbbbyK.....",
-  "......KyyyyyyyyyyyyyyK......",
-  "....KhhK...Kh..hK...KhhK....",
-  "...KhhhK....KhhK....KhhhK...",
+  "..............KKKWWKK........",
+  "..s...........KKWWWWwK...s...",
+  ".s.s..........KWWWWWWwK.s.s..",
+  "..s...........KWWWWWWWwK.s...",
+  ".........KKK...KWWWWWwyK.....",
+  "........KyKK...KKWWWwKKyK....",
+  ".......KyKK.KKKKKKWWK..K.....",
+  ".......KKKKKyyKKyKKKyKK......",
+  ".....KKKKKyyyyKKKyyyyyyK.....",
+  "..KKKKyyyKyyyKKKyyyyyyyyKK...",
+  ".KyKyKKyyyyKKKKyyyKKKyyyyKK..",
+  "..KKKyKyymyyyKKyyKyyyyyyyyKK.",
+  "..KKKKyyyymyyyKKKymyyyyyyyyK.",
+  "..KKKyyyyyyyyyKKKyyyyyyyyyyKK",
+  ".KKKyyyyyyyyyyyKyyyyyyyyyyyyK",
+  ".KKyyyyyyyyyyyyKKKyyyyyKyyyyK",
+  ".KKyyyyyyyyyyKyKKKKyyyyKyyyyK",
+  "KyyyyyKyyKyyyyKKKyKyyyKKyyyyK",
+  "KKKKyyyKKKyymyyyKKKKKKKyyyyyK",
+  "KfKKKyyyyyyyKyyyKyKKKKymyyyKK",
+  "ffKKKyyyyyyyyyyKyKyyyyyyyyyK.",
+  "rfKyKKKyyyyyyyKKKyyyyyyyyyK..",
+  "r.KKyyyKyKKKKKKKyyKyyyyyKK...",
+  "..KKKyKyKyKKKKK.KKKKKKKK.....",
+  "....KKKK.KKKKK.......K.......",
 ];
 
 export const DRAGONS: Record<Stage, string[]> = { baby, young, adult, legendary };

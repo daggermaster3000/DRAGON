@@ -12,9 +12,10 @@ def build_prompt(payees: list[str], categories: list[str]) -> str:
         "You classify Swiss bank transactions into budget categories.\n"
         "Allowed categories (use the exact string, nothing else):\n"
         f"{cats}\n\n"
-        "For each merchant/payee below, pick the single best category. If truly "
-        'unsure, use "Other".\n\n'
-        f"Payees:\n{items}\n\n"
+        "Each item below is a merchant/description (payee plus any payment "
+        "details the bank attached). Pick the single best category for each. If "
+        'truly unsure, use "Other".\n\n'
+        f"Transactions:\n{items}\n\n"
         'Respond ONLY with a JSON object mapping the index (as string) to the '
         'category name, e.g. {"0": "Groceries", "1": "Mobility"}.'
     )

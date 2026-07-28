@@ -67,8 +67,12 @@ def classify_transactions(db: Session, txns: list[Transaction]) -> dict:
                 counts["bank"] += 1
                 continue
 
-        # 3. defer to AI, grouped by unique payee
-        unresolved.setdefault(t.payee or "", []).append(t)
+        # 3. defer to AI, grouped by a descriptor (payee + bank payment details)
+        #    so the model gets the extra context the bank attached.
+        descriptor = t.payee or ""
+        if t.info:
+            descriptor = f"{descriptor} — {t.info[:80]}".strip(" —")
+        unresolved.setdefault(descriptor, []).append(t)
 
     if unresolved:
         _classify_with_ai(unresolved, expense_cat_names, cat_by_name, counts, settings)

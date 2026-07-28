@@ -20,6 +20,7 @@ _ADDED_COLUMNS = {
     "transactions": [
         ("is_split", "BOOLEAN DEFAULT 0"),
         ("split_parent_id", "INTEGER"),
+        ("info", "TEXT"),
     ],
     "bank_category_map": [
         ("subcategory", "VARCHAR"),

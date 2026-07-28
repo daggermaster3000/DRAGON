@@ -54,11 +54,25 @@ def parse_assistant_financier(content: bytes) -> list[dict]:
         is_transfer = df["Bénéficiaire"].astype(str).str.startswith("Transfert", na=False)
         df = df[~is_transfer]
 
+    def _clean(v) -> str:
+        if v is None or (isinstance(v, float) and pd.isna(v)):
+            return ""
+        return " ".join(str(v).split()).strip()
+
     rows: list[dict] = []
     for _, r in df.iterrows():
         payee = str(r.get("Bénéficiaire", "") or "").strip()
         bank_cat = r.get("Catégorie")
         bank_cat = None if pd.isna(bank_cat) else str(bank_cat).strip()
+        # Payment narrative / comments the bank attaches — useful context for the
+        # user and for AI classification. In this export the description sits in
+        # "Référence"; other columns are usually empty but harmless to include.
+        seen_parts: list[str] = []
+        for col in ("Référence", "Informations de paiement", "Commentaire"):
+            val = _clean(r.get(col))
+            if val and val != payee and val not in seen_parts:
+                seen_parts.append(val)
+        info = " · ".join(seen_parts) or None
         rows.append({
             "date": r["Date"].date(),
             "payee": payee,
@@ -66,6 +80,7 @@ def parse_assistant_financier(content: bytes) -> list[dict]:
             "currency": str(r.get("Devise", "CHF") or "CHF").strip(),
             "account": str(r.get("Compte", "") or "").strip(),
             "bank_category": bank_cat,
+            "info": info,
         })
     return rows
 

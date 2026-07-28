@@ -42,7 +42,8 @@ class Transaction(Base):
     classified_by: Mapped[str] = mapped_column(String(16), default="unclassified")
     needs_review: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)   # user note
+    info: Mapped[str | None] = mapped_column(Text, nullable=True)   # bank payment details
     tags: Mapped[str | None] = mapped_column(String(256), nullable=True)
     source_file: Mapped[str | None] = mapped_column(String(256), nullable=True)
     dedup_hash: Mapped[str] = mapped_column(String(64), index=True)

@@ -67,7 +67,7 @@ def evaluate(db: Session) -> list[dict]:
         y, m = int(key[:4]), int(key[5:])
         if date(y, m, 1) >= start:
             continue  # skip the in-progress current month
-        bars = category_lifebars(db, date(y, m, 1))
+        bars = category_lifebars(db, today=date(y, m, 1))
         if bars and not any(b["over_budget"] for b in bars):
             flawless = True
             break

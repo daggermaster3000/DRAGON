@@ -13,6 +13,8 @@ class Lifebar(BaseModel):
     budget: float
     remaining: float
     pct: float
+    projected: float
+    projected_pct: float
     over_budget: bool
     overspend: float
 
@@ -22,6 +24,9 @@ class MonthSummary(BaseModel):
     expense: float
     net: float
     savings_rate: float
+    projected_net: float = 0.0
+    timeframe: str = "monthly"
+    period_label: str = ""
 
 
 class DragonOut(BaseModel):
@@ -56,6 +61,7 @@ class TransactionOut(BaseModel):
     classified_by: str
     needs_review: bool
     note: str | None
+    info: str | None = None
     tags: str | None
     split_parent_id: int | None = None
 

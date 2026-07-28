@@ -7,6 +7,8 @@ export interface Lifebar {
   budget: number;
   remaining: number;
   pct: number;
+  projected: number;
+  projected_pct: number;
   over_budget: boolean;
   overspend: number;
 }
@@ -16,6 +18,20 @@ export interface MonthSummary {
   expense: number;
   net: number;
   savings_rate: number;
+  projected_net: number;
+  timeframe: string;
+  period_label: string;
+}
+
+export interface SeriesPoint {
+  period: string;
+  income: number;
+  expense: number;
+  net: number;
+  is_current: boolean;
+  projected_income?: number;
+  projected_expense?: number;
+  projected_net?: number;
 }
 
 export type Stage = "baby" | "young" | "adult" | "legendary";
@@ -61,6 +77,7 @@ export interface Transaction {
   classified_by: string;
   needs_review: boolean;
   note: string | null;
+  info: string | null;
   tags: string | null;
   split_parent_id: number | null;
 }
@@ -202,8 +219,11 @@ function qs(params: Record<string, unknown> | TxnQuery): string {
 }
 
 export const api = {
-  dashboard: (sort: SortKey = "remaining") =>
-    fetch(`/api/dashboard?sort=${sort}`).then(json<Dashboard>),
+  dashboard: (sort: SortKey = "remaining", timeframe = "monthly") =>
+    fetch(`/api/dashboard?sort=${sort}&timeframe=${timeframe}`).then(json<Dashboard>),
+
+  statsSeries: (timeframe = "monthly", periods = 12) =>
+    fetch(`/api/stats/series?timeframe=${timeframe}&periods=${periods}`).then(json<{ series: SeriesPoint[]; timeframe: string }>),
 
   upload: (file: File) => {
     const body = new FormData();

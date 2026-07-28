@@ -36,7 +36,7 @@ def _to_out(t: Transaction) -> TransactionOut:
         account=t.account, bank_category=t.bank_category, category_id=t.category_id,
         category_name=t.category.name if t.category else None, subcategory=t.subcategory,
         classified_by=t.classified_by, needs_review=t.needs_review, note=t.note, tags=t.tags,
-        split_parent_id=t.split_parent_id,
+        info=t.info, split_parent_id=t.split_parent_id,
     )
 
 

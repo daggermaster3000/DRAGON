@@ -34,7 +34,7 @@ async def import_statement(file: UploadFile = File(...), db: Session = Depends(g
         new_txns.append(Transaction(
             date=r["date"], payee=r["payee"], amount=r["amount"],
             currency=r["currency"], account=r["account"],
-            bank_category=r["bank_category"], dedup_hash=h,
+            bank_category=r["bank_category"], info=r.get("info"), dedup_hash=h,
             source_file=file.filename,
         ))
 

@@ -7,11 +7,52 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..budget_calc import month_bounds
+from ..budget_calc import month_bounds, period_bounds
 from ..db import get_db
 from ..models import Category, Transaction
 
 router = APIRouter(prefix="/api/stats", tags=["stats"])
+
+
+def _period_key(d: date, timeframe: str) -> str:
+    if timeframe == "annual":
+        return f"{d.year}"
+    if timeframe == "quarterly":
+        return f"{d.year}-Q{(d.month - 1) // 3 + 1}"
+    return f"{d.year:04d}-{d.month:02d}"
+
+
+@router.get("/series")
+def series(timeframe: str = Query("monthly"), periods: int = Query(12, ge=1, le=60),
+           db: Session = Depends(get_db)):
+    """Income/expense/net grouped by period, with a pace projection on the
+    current (in-progress) period."""
+    if timeframe not in ("monthly", "quarterly", "annual"):
+        timeframe = "monthly"
+    txns = db.scalars(select(Transaction).where(Transaction.is_split.is_(False))).all()
+    buckets: dict[str, dict] = {}
+    for t in txns:
+        key = _period_key(t.date, timeframe)
+        b = buckets.setdefault(key, {"period": key, "income": 0.0, "expense": 0.0})
+        if t.amount >= 0:
+            b["income"] += t.amount
+        else:
+            b["expense"] += -t.amount
+
+    start, _nxt, _factor, fraction, _label = period_bounds(timeframe)
+    current_key = _period_key(start, timeframe)
+
+    out = sorted(buckets.values(), key=lambda x: x["period"])[-periods:]
+    for b in out:
+        b["income"] = round(b["income"], 2)
+        b["expense"] = round(b["expense"], 2)
+        b["net"] = round(b["income"] - b["expense"], 2)
+        b["is_current"] = b["period"] == current_key
+        if b["is_current"] and fraction > 0:
+            b["projected_expense"] = round(b["expense"] / fraction, 2)
+            b["projected_income"] = round(b["income"] / fraction, 2)
+            b["projected_net"] = round(b["net"] / fraction, 2)
+    return {"series": out, "timeframe": timeframe}
 
 
 @router.get("/daily")

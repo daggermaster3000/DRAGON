@@ -13,22 +13,29 @@ import {
   Tooltip,
 } from "chart.js";
 import { Bar, Chart, Doughnut } from "react-chartjs-2";
-import { api, CHF, type CategorySlice, type MonthPoint, type PlanHealth, type Subscription } from "../api";
+import { api, CHF, type CategorySlice, type PlanHealth, type SeriesPoint, type Subscription } from "../api";
 import { ErrorBox } from "./DashboardView";
+import { C, CATEGORICAL, TIMEFRAMES, type Timeframe } from "../theme";
 
 ChartJS.register(
   CategoryScale, LinearScale, BarController, BarElement, ArcElement,
   LineController, LineElement, PointElement, Tooltip, Legend,
 );
 
-// Brand-neutral, colorblind-safe categorical palette (matches the report tokens).
-const PALETTE = ["#2a78d6", "#e34948", "#1baf7a", "#fab219", "#7a5cc0", "#ec835a", "#0ca30c", "#898781", "#256abf", "#d03b3b"];
-
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+// Lighten a hex color toward white (for the in-progress period bars).
+function fade(hex: string, amt = 0.55): string {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const m = (c: number) => Math.round(c + (255 - c) * amt);
+  return `rgb(${m(r)},${m(g)},${m(b)})`;
+}
 
 export function StatsView({ refreshKey }: { refreshKey: number }) {
   const now = new Date();
-  const [monthly, setMonthly] = useState<MonthPoint[]>([]);
+  const [series, setSeries] = useState<SeriesPoint[]>([]);
+  const [tf, setTf] = useState<Timeframe>("monthly");
   const [cats, setCats] = useState<CategorySlice[]>([]);
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [subTotal, setSubTotal] = useState(0);
@@ -39,15 +46,18 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
   const [catM, setCatM] = useState(now.getMonth() + 1);
 
   useEffect(() => {
-    Promise.all([api.statsMonthly(12), api.subscriptions(), api.planHealth()])
-      .then(([m, s, p]) => {
-        setMonthly(m.series);
+    Promise.all([api.subscriptions(), api.planHealth()])
+      .then(([s, p]) => {
         setSubs(s.subscriptions);
         setSubTotal(s.total_monthly_equiv);
         setPlan(p);
       })
       .catch((e) => setError(e.message));
   }, [refreshKey]);
+
+  useEffect(() => {
+    api.statsSeries(tf, 12).then((r) => setSeries(r.series)).catch((e) => setError(e.message));
+  }, [tf, refreshKey]);
 
   useEffect(() => {
     api.statsCategories(catY, catM).then((c) => setCats(c.items)).catch((e) => setError(e.message));
@@ -61,37 +71,59 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
 
   if (error) return <ErrorBox msg={error} />;
 
+  const current = series.find((s) => s.is_current);
+  const label = (p: string) => (tf === "annual" ? p : p.slice(2)); // trim century for month/quarter
+  // Current (in-progress) period bars are shown faded to signal they're partial.
   const barData = {
-    labels: monthly.map((m) => m.month.slice(2)),
+    labels: series.map((s) => label(s.period)),
     datasets: [
-      { label: "Income", data: monthly.map((m) => m.income), backgroundColor: "#2a78d6", borderRadius: 3 },
-      { label: "Spend", data: monthly.map((m) => m.expense), backgroundColor: "#e34948", borderRadius: 3 },
+      { label: "Income", data: series.map((s) => s.income), borderRadius: 3,
+        backgroundColor: series.map((s) => (s.is_current ? fade(C.income) : C.income)) },
+      { label: "Spend", data: series.map((s) => s.expense), borderRadius: 3,
+        backgroundColor: series.map((s) => (s.is_current ? fade(C.expense) : C.expense)) },
     ],
   };
 
   const doughData = {
     labels: cats.map((c) => c.name),
-    datasets: [{ data: cats.map((c) => c.amount), backgroundColor: cats.map((_, i) => PALETTE[i % PALETTE.length]), borderWidth: 0 }],
+    datasets: [{ data: cats.map((c) => c.amount), backgroundColor: cats.map((_, i) => CATEGORICAL[i % CATEGORICAL.length]), borderWidth: 0 }],
   };
 
   return (
     <div className="space-y-6">
       <section className="rounded-2xl border border-black/10 bg-surface p-4">
-        <h2 className="mb-3 text-sm font-semibold text-ink">Income vs. spend — last 12 months</h2>
-        {monthly.length === 0 ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-ink">Income vs. spend</h2>
+          <div className="flex gap-1 rounded-lg border border-black/10 p-0.5">
+            {TIMEFRAMES.map((t) => (
+              <button key={t.key} onClick={() => setTf(t.key)}
+                className={`rounded-md px-2.5 py-1 text-xs transition ${tf === t.key ? "bg-ink text-white" : "text-ink-soft hover:bg-black/5"}`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {series.length === 0 ? (
           <Empty />
         ) : (
-          <div className="h-64">
-            <Bar
-              data={barData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } },
-                scales: { y: { ticks: { callback: (v) => CHF(Number(v)) } } },
-              }}
-            />
-          </div>
+          <>
+            <div className="h-64">
+              <Bar
+                data={barData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } },
+                  scales: { y: { ticks: { callback: (v) => CHF(Number(v)) } } },
+                }}
+              />
+            </div>
+            {current && current.projected_expense != null && (
+              <p className="mt-2 text-[11px]" style={{ color: C.projection }}>
+                ◆ Current period on pace for income {CHF(current.projected_income ?? 0)} · spend {CHF(current.projected_expense)} · net {CHF(current.projected_net ?? 0)} (faded bars are in progress)
+              </p>
+            )}
+          </>
         )}
       </section>
 
@@ -110,7 +142,7 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
                     type: "bar" as const,
                     label: "Actual net",
                     data: plan.monthly.map((m) => m.net),
-                    backgroundColor: plan.monthly.map((m) => (m.net >= 0 ? "#1baf7a" : "#e34948")),
+                    backgroundColor: plan.monthly.map((m) => (m.net >= 0 ? C.net : C.expense)),
                     borderRadius: 3,
                     order: 2,
                   },
@@ -118,7 +150,7 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
                     type: "line" as const,
                     label: "Plan target",
                     data: plan.monthly.map((m) => m.target),
-                    borderColor: "#2a78d6",
+                    borderColor: C.projection,
                     borderDash: [5, 4],
                     borderWidth: 2,
                     pointRadius: 0,

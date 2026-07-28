@@ -142,6 +142,8 @@ export function TransactionsView({ refreshKey }: { refreshKey: number }) {
                       {t.amount >= 0 ? "+" : ""}{CHF(t.amount)}
                     </span>
                   </div>
+                  {/* bank payment details (from the excel note) */}
+                  {t.info && <div className="mt-0.5 truncate text-[10px] text-ink-muted" title={t.info}>{t.info}</div>}
                   {/* line 2: date · status · category · subcategory · split (wraps on mobile) */}
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     <span className="shrink-0 text-[10px] text-ink-muted tabular-nums">{t.date.slice(5)}</span>

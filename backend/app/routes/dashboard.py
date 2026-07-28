@@ -9,7 +9,7 @@ import json
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from ..budget_calc import category_lifebars, month_bounds, month_summary
+from ..budget_calc import category_lifebars, month_bounds, period_summary
 from ..db import get_db
 from ..dragon import compute_dragon
 from ..models import Category, Transaction
@@ -23,21 +23,30 @@ SORTS = {
     "alphabetical": lambda b: b["name"].lower(),
 }
 
+TIMEFRAMES = {"monthly", "quarterly", "annual"}
+
+
+def _tf(timeframe: str) -> str:
+    return timeframe if timeframe in TIMEFRAMES else "monthly"
+
 
 @router.get("/dashboard", response_model=DashboardOut)
-def dashboard(sort: str = Query("remaining"), db: Session = Depends(get_db)):
-    bars = category_lifebars(db)
+def dashboard(sort: str = Query("remaining"), timeframe: str = Query("monthly"),
+             db: Session = Depends(get_db)):
+    tf = _tf(timeframe)
+    bars = category_lifebars(db, tf)
     bars.sort(key=SORTS.get(sort, SORTS["remaining"]))
     return DashboardOut(
-        summary=month_summary(db),          # type: ignore[arg-type]
+        summary=period_summary(db, tf),     # type: ignore[arg-type]
         lifebars=[Lifebar(**b) for b in bars],
         dragon=compute_dragon(db),          # type: ignore[arg-type]
     )
 
 
 @router.get("/budget", response_model=list[Lifebar])
-def budget(sort: str = Query("remaining"), db: Session = Depends(get_db)):
-    bars = category_lifebars(db)
+def budget(sort: str = Query("remaining"), timeframe: str = Query("monthly"),
+           db: Session = Depends(get_db)):
+    bars = category_lifebars(db, _tf(timeframe))
     bars.sort(key=SORTS.get(sort, SORTS["remaining"]))
     return [Lifebar(**b) for b in bars]
 

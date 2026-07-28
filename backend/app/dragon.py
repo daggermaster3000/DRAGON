@@ -45,7 +45,7 @@ def _adherence(bars: list[dict]) -> float:
 def compute_dragon(db: Session, event: str | None = None, today: date | None = None) -> dict:
     """Derive + persist dragon state. `event` biases mood (e.g. 'upload')."""
     today = today or date.today()
-    bars = category_lifebars(db, today)
+    bars = category_lifebars(db, today=today)
     summary = month_summary(db, today)
     net_total = _cumulative_net(db)
     adherence = _adherence(bars)

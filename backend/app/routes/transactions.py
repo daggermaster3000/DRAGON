@@ -30,6 +30,8 @@ def list_transactions(
     q: str | None = Query(None, description="search payee substring"),
     category_id: int | None = None,
     needs_review: bool | None = None,
+    date_from: date | None = Query(None, description="inclusive lower bound"),
+    date_to: date | None = Query(None, description="inclusive upper bound"),
     limit: int = Query(200, le=1000),
     offset: int = 0,
 ):
@@ -40,6 +42,10 @@ def list_transactions(
         stmt = stmt.where(Transaction.category_id == category_id)
     if needs_review is not None:
         stmt = stmt.where(Transaction.needs_review == needs_review)
+    if date_from is not None:
+        stmt = stmt.where(Transaction.date >= date_from)
+    if date_to is not None:
+        stmt = stmt.where(Transaction.date <= date_to)
     stmt = stmt.limit(limit).offset(offset)
     return [_to_out(t) for t in db.scalars(stmt).all()]
 

@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
 import {
+  ArcElement,
+  BarController,
   BarElement,
   CategoryScale,
   Chart as ChartJS,
   Legend,
   LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
   Tooltip,
-  ArcElement,
 } from "chart.js";
-import { Bar, Doughnut } from "react-chartjs-2";
-import { api, CHF, type CategorySlice, type MonthPoint, type Subscription } from "../api";
+import { Bar, Chart, Doughnut } from "react-chartjs-2";
+import { api, CHF, type CategorySlice, type MonthPoint, type PlanHealth, type Subscription } from "../api";
 import { ErrorBox } from "./DashboardView";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale, LinearScale, BarController, BarElement, ArcElement,
+  LineController, LineElement, PointElement, Tooltip, Legend,
+);
 
 // Brand-neutral, colorblind-safe categorical palette (matches the report tokens).
 const PALETTE = ["#2a78d6", "#e34948", "#1baf7a", "#fab219", "#7a5cc0", "#ec835a", "#0ca30c", "#898781", "#256abf", "#d03b3b"];
@@ -23,16 +30,18 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
   const [catMonth, setCatMonth] = useState<string>("");
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [subTotal, setSubTotal] = useState(0);
+  const [plan, setPlan] = useState<PlanHealth | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([api.statsMonthly(12), api.statsCategories(), api.subscriptions()])
-      .then(([m, c, s]) => {
+    Promise.all([api.statsMonthly(12), api.statsCategories(), api.subscriptions(), api.planHealth()])
+      .then(([m, c, s, p]) => {
         setMonthly(m.series);
         setCats(c.items);
         setCatMonth(c.month);
         setSubs(s.subscriptions);
         setSubTotal(s.total_monthly_equiv);
+        setPlan(p);
       })
       .catch((e) => setError(e.message));
   }, [refreshKey]);
@@ -62,6 +71,48 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
           <div className="h-64">
             <Bar
               data={barData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } },
+                scales: { y: { ticks: { callback: (v) => CHF(Number(v)) } } },
+              }}
+            />
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-black/10 bg-surface p-4">
+        <h2 className="mb-3 text-sm font-semibold text-ink">Net savings vs plan</h2>
+        {!plan || plan.monthly.length === 0 ? (
+          <Empty />
+        ) : (
+          <div className="h-64">
+            <Chart
+              type="bar"
+              data={{
+                labels: plan.monthly.map((m) => m.month.slice(2)),
+                datasets: [
+                  {
+                    type: "bar" as const,
+                    label: "Actual net",
+                    data: plan.monthly.map((m) => m.net),
+                    backgroundColor: plan.monthly.map((m) => (m.net >= 0 ? "#1baf7a" : "#e34948")),
+                    borderRadius: 3,
+                    order: 2,
+                  },
+                  {
+                    type: "line" as const,
+                    label: "Plan target",
+                    data: plan.monthly.map((m) => m.target),
+                    borderColor: "#2a78d6",
+                    borderDash: [5, 4],
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    order: 1,
+                  },
+                ],
+              }}
               options={{
                 responsive: true,
                 maintainAspectRatio: false,

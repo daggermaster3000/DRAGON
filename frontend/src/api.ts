@@ -137,6 +137,27 @@ export interface SplitPart {
   note?: string | null;
 }
 
+export type PlanStatus = "on_track" | "watch" | "off_track";
+
+export interface PlanHealth {
+  month_pace: {
+    day: number;
+    days_in_month: number;
+    spent: number;
+    budget: number;
+    projected: number;
+    status: PlanStatus;
+  };
+  savings: {
+    planned_monthly: number;
+    ytd_actual: number;
+    ytd_target: number;
+    delta: number;
+    status: PlanStatus;
+  };
+  monthly: { month: string; net: number; target: number }[];
+}
+
 export interface CategoryDetail {
   id: number;
   name: string;
@@ -229,6 +250,25 @@ export const api = {
 
   categoryDetail: (categoryId: number) =>
     fetch(`/api/budget/${categoryId}/detail`).then(json<CategoryDetail>),
+
+  createCategory: (name: string, monthly_budget: number, kind = "expense") =>
+    fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, monthly_budget, kind }),
+    }).then(json<Category>),
+
+  updateCategory: (id: number, patch: { name?: string; monthly_budget?: number }) =>
+    fetch(`/api/categories/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    }).then(json<Category>),
+
+  deleteCategory: (id: number) =>
+    fetch(`/api/categories/${id}`, { method: "DELETE" }).then(json<{ deleted: number; transactions_detached: number }>),
+
+  planHealth: () => fetch("/api/health/plan").then(json<PlanHealth>),
 };
 
 export const CHF = (n: number) =>

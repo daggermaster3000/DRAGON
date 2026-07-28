@@ -3,6 +3,7 @@ import { api, CHF, type Dashboard, type SortKey } from "../api";
 import { PixelDragon } from "../components/PixelDragon";
 import { LifebarRow } from "../components/LifebarRow";
 import { CategoryDetailPanel } from "../components/CategoryDetailPanel";
+import { OnTrackCards } from "../components/OnTrackCards";
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "remaining", label: "Remaining" },
@@ -25,6 +26,7 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
 
   return (
     <>
+      <OnTrackCards refreshKey={refreshKey} />
       <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex items-center justify-center rounded-2xl border border-black/10 bg-surface py-6">
           <PixelDragon dragon={data.dragon} />

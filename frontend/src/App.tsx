@@ -6,14 +6,16 @@ import { TransactionsView } from "./views/TransactionsView";
 import { CalendarView } from "./views/CalendarView";
 import { StatsView } from "./views/StatsView";
 import { RulesView } from "./views/RulesView";
+import { BudgetView } from "./views/BudgetView";
 
-type Tab = "dashboard" | "transactions" | "calendar" | "stats" | "rules";
+type Tab = "dashboard" | "transactions" | "calendar" | "stats" | "budget" | "rules";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "dashboard", label: "🐉 Dashboard" },
   { key: "transactions", label: "Transactions" },
   { key: "calendar", label: "Calendar" },
   { key: "stats", label: "Stats" },
+  { key: "budget", label: "Budget" },
   { key: "rules", label: "Rules" },
 ];
 
@@ -60,6 +62,7 @@ export default function App() {
       {tab === "transactions" && <TransactionsView refreshKey={refreshKey} />}
       {tab === "calendar" && <CalendarView refreshKey={refreshKey} />}
       {tab === "stats" && <StatsView refreshKey={refreshKey} />}
+      {tab === "budget" && <BudgetView onChanged={() => setRefreshKey((k) => k + 1)} />}
       {tab === "rules" && <RulesView onReclassified={() => setRefreshKey((k) => k + 1)} />}
     </div>
   );

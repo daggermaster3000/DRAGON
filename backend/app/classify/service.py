@@ -24,13 +24,17 @@ from .openai_provider import OpenAIProvider
 REVIEW_AMOUNT_THRESHOLD = 1000.0
 
 
-def _build_provider():
+def build_provider():
+    """Instantiate the configured AI provider, or None for rules-only."""
     s = get_settings()
     if s.ai_provider == "ollama":
         return OllamaProvider(s.ollama_base_url, s.ollama_model)
     if s.ai_provider == "openai":
         return OpenAIProvider(s.openai_api_key, s.openai_model)
     return None  # "rules" or unknown -> deterministic only
+
+
+_build_provider = build_provider  # backward-compatible alias
 
 
 def classify_transactions(db: Session, txns: list[Transaction]) -> dict:

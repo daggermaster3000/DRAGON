@@ -299,6 +299,9 @@ export const api = {
 
   achievements: () =>
     fetch("/api/achievements").then(json<{ achievements: Achievement[]; unlocked: number; total: number; newly_unlocked: string[] }>),
+
+  dragonQuip: () =>
+    fetch("/api/dragon/quip").then(json<{ quip: string; source: "ai" | "fallback"; day: unknown }>),
 };
 
 export const CHF = (n: number) =>

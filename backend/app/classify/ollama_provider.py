@@ -40,3 +40,17 @@ class OllamaProvider:
             return parse_response(text, payees, categories)
         except Exception:
             return [None] * len(payees)
+
+    def generate(self, prompt: str, temperature: float = 0.8) -> str | None:
+        try:
+            r = httpx.post(
+                f"{self.base_url}/api/generate",
+                json={"model": self.model, "prompt": prompt, "stream": False,
+                      "options": {"temperature": temperature}},
+                timeout=self.timeout,
+            )
+            r.raise_for_status()
+            text = (r.json().get("response") or "").strip()
+            return text or None
+        except Exception:
+            return None

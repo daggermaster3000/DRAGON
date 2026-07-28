@@ -17,10 +17,22 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
   const [sort, setSort] = useState<SortKey>("remaining");
   const [error, setError] = useState<string | null>(null);
   const [openCat, setOpenCat] = useState<number | null>(null);
+  const [quip, setQuip] = useState<string | null>(null);
+  const [quipLoading, setQuipLoading] = useState(false);
 
   useEffect(() => {
     api.dashboard(sort).then(setData).catch((e) => setError(e.message));
   }, [sort, refreshKey]);
+
+  // The dragon's roast loads independently (the LLM can be slow on a Pi).
+  function loadQuip() {
+    setQuipLoading(true);
+    api.dragonQuip()
+      .then((q) => setQuip(q.quip))
+      .catch(() => setQuip(null))
+      .finally(() => setQuipLoading(false));
+  }
+  useEffect(loadQuip, [refreshKey]);
 
   if (error) return <ErrorBox msg={error} />;
   if (!data) return <p className="text-sm text-ink-muted">Loading…</p>;
@@ -29,8 +41,8 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
     <>
       <OnTrackCards refreshKey={refreshKey} />
       <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex items-center justify-center rounded-2xl border border-black/10 bg-surface py-6">
-          <PixelDragon dragon={data.dragon} />
+        <div className="flex items-center justify-center rounded-2xl border border-black/10 bg-surface px-3 py-6">
+          <PixelDragon dragon={data.dragon} quip={quip} quipLoading={quipLoading} onPoke={loadQuip} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Stat label="Income (mo)" value={CHF(data.summary.income)} />

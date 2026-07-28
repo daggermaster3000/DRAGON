@@ -39,3 +39,21 @@ class OpenAIProvider:
             return parse_response(text, payees, categories)
         except Exception:
             return [None] * len(payees)
+
+    def generate(self, prompt: str, temperature: float = 0.9) -> str | None:
+        try:
+            r = httpx.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json={
+                    "model": self.model,
+                    "temperature": temperature,
+                    "max_tokens": 90,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+                timeout=self.timeout,
+            )
+            r.raise_for_status()
+            return (r.json()["choices"][0]["message"]["content"] or "").strip() or None
+        except Exception:
+            return None

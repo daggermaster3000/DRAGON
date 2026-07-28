@@ -32,9 +32,9 @@ export default function App() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 pb-20 pt-6">
-      <header className="mb-4 flex items-center justify-between">
+      <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-pixel text-base text-ink">Budget Dragon</h1>
+          <h1 className="font-pixel text-sm text-ink sm:text-base">Budget Dragon</h1>
           <p className="mt-1 text-xs text-ink-muted">Feed it good habits. Watch it grow.</p>
         </div>
         <UploadButton onImported={onImported} />

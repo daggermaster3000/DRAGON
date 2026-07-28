@@ -137,6 +137,17 @@ export interface SplitPart {
   note?: string | null;
 }
 
+export interface Achievement {
+  key: string;
+  icon: string;
+  title: string;
+  desc: string;
+  unlocked: boolean;
+  progress: number;
+  unlocked_at: string | null;
+  is_new: boolean;
+}
+
 export type PlanStatus = "on_track" | "watch" | "off_track";
 
 export interface PlanHealth {
@@ -269,6 +280,9 @@ export const api = {
     fetch(`/api/categories/${id}`, { method: "DELETE" }).then(json<{ deleted: number; transactions_detached: number }>),
 
   planHealth: () => fetch("/api/health/plan").then(json<PlanHealth>),
+
+  achievements: () =>
+    fetch("/api/achievements").then(json<{ achievements: Achievement[]; unlocked: number; total: number; newly_unlocked: string[] }>),
 };
 
 export const CHF = (n: number) =>

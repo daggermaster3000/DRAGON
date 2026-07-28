@@ -105,6 +105,14 @@ class Setting(Base):
     value: Mapped[str] = mapped_column(Text, default="")
 
 
+class Achievement(Base):
+    """Unlocked achievements. Row exists only once unlocked (with timestamp)."""
+    __tablename__ = "achievements"
+
+    key: Mapped[str] = mapped_column(String(48), primary_key=True)
+    unlocked_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+
 class ActionLog(Base):
     """Reversible record of a mutating action, for single-step undo.
     `data` is JSON holding whatever the reverse needs (prior states, new ids)."""

@@ -55,7 +55,7 @@ export function PixelDragon({ dragon }: { dragon: Dragon }) {
         <div className={dragon.mood === "sleepy" ? "" : "origin-bottom"}>
           <canvas
             ref={canvasRef}
-            className={`pixelated ${MOOD_ANIM[dragon.mood]}`}
+            className={`pixelated h-auto max-w-full ${MOOD_ANIM[dragon.mood]}`}
             aria-label={`${STAGE_LABEL[stage]}, ${dragon.mood}`}
           />
         </div>

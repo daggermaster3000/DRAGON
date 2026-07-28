@@ -4,6 +4,7 @@ import { PixelDragon } from "../components/PixelDragon";
 import { LifebarRow } from "../components/LifebarRow";
 import { CategoryDetailPanel } from "../components/CategoryDetailPanel";
 import { OnTrackCards } from "../components/OnTrackCards";
+import { AchievementsGrid } from "../components/AchievementsGrid";
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "remaining", label: "Remaining" },
@@ -69,6 +70,8 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
         </div>
         {openCat !== null && <CategoryDetailPanel categoryId={openCat} onClose={() => setOpenCat(null)} />}
       </section>
+
+      <AchievementsGrid refreshKey={refreshKey} />
     </>
   );
 }

@@ -285,8 +285,8 @@ export const api = {
 
   undo: () => fetch("/api/transactions/undo", { method: "POST" }).then(json<{ undone: string }>),
 
-  categoryDetail: (categoryId: number) =>
-    fetch(`/api/budget/${categoryId}/detail`).then(json<CategoryDetail>),
+  categoryDetail: (categoryId: number, timeframe = "monthly") =>
+    fetch(`/api/budget/${categoryId}/detail?timeframe=${timeframe}`).then(json<CategoryDetail>),
 
   createCategory: (name: string, monthly_budget: number, kind = "expense") =>
     fetch("/api/categories", {

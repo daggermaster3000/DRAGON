@@ -105,7 +105,7 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
             ))
           )}
         </div>
-        {openCat !== null && <CategoryDetailPanel categoryId={openCat} onClose={() => setOpenCat(null)} />}
+        {openCat !== null && <CategoryDetailPanel categoryId={openCat} timeframe={timeframe} onClose={() => setOpenCat(null)} />}
       </section>
 
       <AchievementsGrid refreshKey={refreshKey} />

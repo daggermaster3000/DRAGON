@@ -9,7 +9,7 @@ import json
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from ..budget_calc import category_lifebars, month_bounds, period_summary
+from ..budget_calc import category_lifebars, period_bounds, period_summary
 from ..db import get_db
 from ..dragon import compute_dragon
 from ..models import Category, Transaction
@@ -70,13 +70,13 @@ def categories(db: Session = Depends(get_db)):
 
 
 @router.get("/budget/{category_id}/detail")
-def category_detail(category_id: int, db: Session = Depends(get_db)):
-    """Drill-down for a lifebar: per-subcategory budget vs spend + this-month
-    transactions in the category."""
+def category_detail(category_id: int, timeframe: str = Query("monthly"), db: Session = Depends(get_db)):
+    """Drill-down for a lifebar: per-subcategory budget vs spend + this-period
+    transactions in the category. Budgets scale with the selected timeframe."""
     cat = db.get(Category, category_id)
     if not cat:
         raise HTTPException(404, "category not found")
-    start, nxt = month_bounds()
+    start, nxt, factor, _fraction, _label = period_bounds(_tf(timeframe))
 
     txns = db.scalars(
         select(Transaction)
@@ -96,7 +96,7 @@ def category_detail(category_id: int, db: Session = Depends(get_db)):
     for s in seed_subs:
         name = s["name"]
         seen.add(name)
-        budget = round(float(s.get("monthly_budget", 0.0)), 2)
+        budget = round(float(s.get("monthly_budget", 0.0)) * factor, 2)
         spent = round(spent_by_sub.get(name, 0.0), 2)
         if budget == 0 and spent == 0:
             continue
@@ -111,7 +111,7 @@ def category_detail(category_id: int, db: Session = Depends(get_db)):
     return {
         "id": cat.id,
         "name": cat.name,
-        "budget": round(cat.monthly_budget, 2),
+        "budget": round(cat.monthly_budget * factor, 2),
         "spent": spent_total,
         "subcategories": subs,
         "transactions": [

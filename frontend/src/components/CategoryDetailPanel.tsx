@@ -20,14 +20,22 @@ function SubBar({ name, budget, spent }: { name: string; budget: number; spent: 
   );
 }
 
-export function CategoryDetailPanel({ categoryId, onClose }: { categoryId: number; onClose: () => void }) {
+export function CategoryDetailPanel({
+  categoryId,
+  timeframe = "monthly",
+  onClose,
+}: {
+  categoryId: number;
+  timeframe?: string;
+  onClose: () => void;
+}) {
   const [detail, setDetail] = useState<CategoryDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setDetail(null);
-    api.categoryDetail(categoryId).then(setDetail).catch((e) => setError(e.message));
-  }, [categoryId]);
+    api.categoryDetail(categoryId, timeframe).then(setDetail).catch((e) => setError(e.message));
+  }, [categoryId, timeframe]);
 
   return (
     <div className="mt-4 rounded-2xl border border-ink/20 bg-surface p-4">

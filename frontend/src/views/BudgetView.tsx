@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, CHF, type Category, type Subcategory } from "../api";
 import { ErrorBox } from "./DashboardView";
+import { TIMEFRAMES, type Timeframe } from "../theme";
+
+const FACTOR: Record<Timeframe, number> = { monthly: 1, quarterly: 3, annual: 12 };
+const SUFFIX: Record<Timeframe, string> = { monthly: "/mo", quarterly: "/qtr", annual: "/yr" };
 
 export function BudgetView({ onChanged }: { onChanged: () => void }) {
   const [cats, setCats] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
+  const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
+  const factor = FACTOR[timeframe];
 
   function load() {
     api.categories().then(setCats).catch((e) => setError(e.message));
@@ -14,8 +20,8 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
 
   const expense = useMemo(() => cats.filter((c) => c.kind === "expense"), [cats]);
   const income = useMemo(() => cats.filter((c) => c.kind === "income"), [cats]);
-  const totalExpense = expense.reduce((s, c) => s + c.monthly_budget, 0);
-  const totalIncome = income.reduce((s, c) => s + c.monthly_budget, 0);
+  const totalExpense = expense.reduce((s, c) => s + c.monthly_budget, 0) * factor;
+  const totalIncome = income.reduce((s, c) => s + c.monthly_budget, 0) * factor;
   const plannedNet = totalIncome - totalExpense;
 
   function replaceCat(updated: Category) {
@@ -60,15 +66,20 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
     <div>
       {error && <div className="mb-3"><ErrorBox msg={error} /></div>}
 
-      <div className="mb-4 grid grid-cols-3 gap-2 sm:gap-3">
-        <Tot label="Income / mo" value={CHF(totalIncome)} />
-        <Tot label="Expenses / mo" value={CHF(totalExpense)} />
-        <Tot label="Planned savings" value={(plannedNet >= 0 ? "+" : "") + CHF(plannedNet)} good={plannedNet >= 0} />
-      </div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-ink-muted">
-          From your Budget-Tool. Tap a category to edit its line items (incl. Reserves &amp; Savings). A category's total is the sum of its lines.
-        </p>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-1 rounded-lg border border-black/10 bg-surface p-0.5">
+          {TIMEFRAMES.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTimeframe(t.key)}
+              className={`rounded-md px-3 py-1 text-xs transition ${
+                timeframe === t.key ? "bg-ink text-white" : "text-ink-soft hover:bg-black/5"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
         <button
           onClick={resetToDefaults}
           className="shrink-0 rounded-lg border border-black/10 px-3 py-1.5 text-xs text-ink-soft hover:bg-black/5"
@@ -77,10 +88,19 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
         </button>
       </div>
 
+      <div className="mb-4 grid grid-cols-3 gap-2 sm:gap-3">
+        <Tot label={`Income ${SUFFIX[timeframe]}`} value={CHF(totalIncome)} />
+        <Tot label={`Expenses ${SUFFIX[timeframe]}`} value={CHF(totalExpense)} />
+        <Tot label="Planned savings" value={(plannedNet >= 0 ? "+" : "") + CHF(plannedNet)} good={plannedNet >= 0} />
+      </div>
+      <p className="mb-4 text-xs text-ink-muted">
+        From your Budget-Tool. Amounts shown {SUFFIX[timeframe]}. Tap a category to edit its line items (incl. Reserves &amp; Savings). Its total is the sum of its lines.
+      </p>
+
       <h2 className="mb-2 text-sm font-semibold text-ink">Expense categories</h2>
       <div className="mb-4 space-y-2">
         {expense.map((c) => (
-          <CategoryRow key={c.id} cat={c} onRename={rename} onRemove={remove} onSaved={replaceCat} onError={setError} />
+          <CategoryRow key={c.id} cat={c} factor={factor} suffix={SUFFIX[timeframe]} onRename={rename} onRemove={remove} onSaved={replaceCat} onError={setError} />
         ))}
       </div>
 
@@ -96,7 +116,7 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
       <h2 className="mb-2 text-sm font-semibold text-ink">Income categories</h2>
       <div className="space-y-2">
         {income.map((c) => (
-          <CategoryRow key={c.id} cat={c} onRename={rename} onRemove={remove} onSaved={replaceCat} onError={setError} />
+          <CategoryRow key={c.id} cat={c} factor={factor} suffix={SUFFIX[timeframe]} onRename={rename} onRemove={remove} onSaved={replaceCat} onError={setError} />
         ))}
       </div>
     </div>
@@ -104,9 +124,11 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
 }
 
 function CategoryRow({
-  cat, onRename, onRemove, onSaved, onError,
+  cat, factor, suffix, onRename, onRemove, onSaved, onError,
 }: {
   cat: Category;
+  factor: number;
+  suffix: string;
   onRename: (c: Category, v: string) => void;
   onRemove: (c: Category) => void;
   onSaved: (c: Category) => void;
@@ -119,7 +141,7 @@ function CategoryRow({
   // Keep local subs in sync if parent replaces the category (e.g. after save).
   useEffect(() => setSubs(cat.subcategories), [cat.subcategories]);
 
-  const localTotal = subs.reduce((s, x) => s + (Number(x.monthly_budget) || 0), 0);
+  const localTotal = subs.reduce((s, x) => s + (Number(x.monthly_budget) || 0), 0) * factor;
 
   async function save(next: Subcategory[]) {
     setSaving(true);
@@ -154,8 +176,8 @@ function CategoryRow({
           onBlur={(e) => onRename(cat, e.target.value)}
           className="min-w-0 flex-1 rounded bg-transparent px-1 py-1 text-sm text-ink outline-none focus:bg-black/5"
         />
-        <span className="shrink-0 text-sm font-medium tabular-nums text-ink-soft">{CHF(cat.monthly_budget)}</span>
-        <span className="shrink-0 text-[10px] text-ink-muted">/mo</span>
+        <span className="shrink-0 text-sm font-medium tabular-nums text-ink-soft">{CHF(cat.monthly_budget * factor)}</span>
+        <span className="shrink-0 text-[10px] text-ink-muted">{suffix}</span>
         <button onClick={() => onRemove(cat)} className="shrink-0 text-ink-muted hover:text-hp-danger" aria-label="delete category">✕</button>
       </div>
 
@@ -174,8 +196,8 @@ function CategoryRow({
                 <input
                   type="number"
                   step="1"
-                  value={s.monthly_budget}
-                  onChange={(e) => setSub(i, { monthly_budget: Number(e.target.value) })}
+                  value={Math.round(s.monthly_budget * factor)}
+                  onChange={(e) => setSub(i, { monthly_budget: (Number(e.target.value) || 0) / factor })}
                   onBlur={() => save(subs)}
                   className="w-20 shrink-0 rounded border border-black/10 bg-white px-2 py-1 text-right text-xs tabular-nums outline-none focus:border-ink/30"
                 />

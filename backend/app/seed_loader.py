@@ -21,6 +21,9 @@ _ADDED_COLUMNS = {
         ("is_split", "BOOLEAN DEFAULT 0"),
         ("split_parent_id", "INTEGER"),
     ],
+    "bank_category_map": [
+        ("subcategory", "VARCHAR"),
+    ],
 }
 
 
@@ -71,9 +74,17 @@ def _seed(db: Session) -> None:
                 subcategory=r.get("subcategory"), priority=i, source="seed",
             ))
 
-    if not db.scalar(select(BankCategoryMap).limit(1)):
-        for bank_cat, budget_cat in seed.get("bank_category_map", {}).items():
-            db.add(BankCategoryMap(bank_category=bank_cat, category_name=budget_cat))
+    # Upsert the bank map (idempotent) so existing DBs pick up subcategories too.
+    existing_bank = {m.bank_category: m for m in db.scalars(select(BankCategoryMap)).all()}
+    for bank_cat, mapping in seed.get("bank_category_map", {}).items():
+        cat = mapping.get("category") if isinstance(mapping, dict) else mapping
+        sub = mapping.get("subcategory") if isinstance(mapping, dict) else None
+        row = existing_bank.get(bank_cat)
+        if row:
+            row.category_name = cat
+            row.subcategory = sub
+        else:
+            db.add(BankCategoryMap(bank_category=bank_cat, category_name=cat, subcategory=sub))
 
     if not db.scalar(select(DragonState).limit(1)):
         db.add(DragonState(id=1, stage="baby", mood="idle", xp=0))

@@ -75,6 +75,7 @@ class BankCategoryMap(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     bank_category: Mapped[str] = mapped_column(String(128), unique=True)
     category_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    subcategory: Mapped[str | None] = mapped_column(String(128), nullable=True)
 
 
 class DragonState(Base):

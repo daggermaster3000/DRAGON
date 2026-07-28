@@ -301,7 +301,7 @@ export const api = {
     fetch("/api/achievements").then(json<{ achievements: Achievement[]; unlocked: number; total: number; newly_unlocked: string[] }>),
 
   dragonQuip: () =>
-    fetch("/api/dragon/quip").then(json<{ quip: string; source: "ai" | "fallback"; day: unknown }>),
+    fetch("/api/dragon/quip").then(json<{ quip: string; source: "ai" | "fallback"; cached: boolean }>),
 };
 
 export const CHF = (n: number) =>

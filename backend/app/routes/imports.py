@@ -43,6 +43,9 @@ async def import_statement(file: UploadFile = File(...), db: Session = Depends(g
     db.add(ImportBatch(filename=file.filename or "upload.xlsx", n_rows=len(rows), n_new=len(new_txns)))
     db.commit()
 
+    from .quip import invalidate_cache
+    invalidate_cache(db)  # next quip reflects the freshly imported data
+
     dragon = compute_dragon(db, event="upload")
     return ImportResult(
         filename=file.filename or "upload.xlsx",

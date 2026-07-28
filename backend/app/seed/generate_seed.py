@@ -17,32 +17,34 @@ from pathlib import Path
 
 import openpyxl
 
-# Bank export (French "Assistant financier") category -> budget Category.
-# None means "ambiguous, hand to the classifier / leave for review".
+# Bank export (French "Assistant financier") category -> budget category +
+# a default subcategory (the bank's categories are essentially line-items).
+# {"category": None} means "ambiguous, hand to the classifier / leave for review".
+# subcategory None -> category assigned, but line-item left for manual choice.
 BANK_CATEGORY_MAP = {
-    "Courses": "Groceries",
-    "Restauration": "Groceries",
-    "Loyer et hypothèque": "Housing",
-    "Amélioration de l'habitat": "Housing",
-    "Voiture": "Car and motorcycle",
-    "Transports publics": "Mobility",
-    "Loisirs": "Leisure and holidays",
-    "Voyages": "Leisure and holidays",
-    "Soins personnels": "Health and personal care",
-    "Pharmacie et droguerie": "Health and personal care",
-    "Médecins et services de santé": "Health and personal care",
-    "Assurance-maladie": "Health and personal care",
-    "Impôts": "Taxes",
-    "Shopping": "Other",
-    "Services": "Communication and entertainment",
-    "Général": None,
-    "Paiements": None,
-    "Retraits": "Other",
-    "Remboursements": "Other",
-    "Épargne et placements": "Reserves",
+    "Courses": {"category": "Groceries", "subcategory": "Groceries and beverages"},
+    "Restauration": {"category": "Groceries", "subcategory": "Dining out (restaurants, canteens)"},
+    "Loyer et hypothèque": {"category": "Housing", "subcategory": "Rent"},
+    "Amélioration de l'habitat": {"category": "Housing", "subcategory": "Maintenance and smaller repairs"},
+    "Voiture": {"category": "Car and motorcycle", "subcategory": None},
+    "Transports publics": {"category": "Mobility", "subcategory": "Public transportation passes"},
+    "Loisirs": {"category": "Leisure and holidays", "subcategory": "Events, clubs, bars, cinemas"},
+    "Voyages": {"category": "Leisure and holidays", "subcategory": "Holidays and excursions"},
+    "Soins personnels": {"category": "Health and personal care", "subcategory": "Personal hygiene"},
+    "Pharmacie et droguerie": {"category": "Health and personal care", "subcategory": "Personal hygiene"},
+    "Médecins et services de santé": {"category": "Health and personal care", "subcategory": None},
+    "Assurance-maladie": {"category": "Health and personal care", "subcategory": "Mandatory health insurance"},
+    "Impôts": {"category": "Taxes", "subcategory": None},
+    "Shopping": {"category": "Other", "subcategory": "Consumer goods"},
+    "Services": {"category": "Communication and entertainment", "subcategory": None},
+    "Général": {"category": None, "subcategory": None},
+    "Paiements": {"category": None, "subcategory": None},
+    "Retraits": {"category": "Other", "subcategory": "Other expenses"},
+    "Remboursements": {"category": "Other", "subcategory": None},
+    "Épargne et placements": {"category": "Reserves", "subcategory": None},
     # Income-side bank categories
-    "Salaire": "Erwerbseinkommen",
-    "Autres revenus": "Übriges",
+    "Salaire": {"category": "Erwerbseinkommen", "subcategory": "Net salary"},
+    "Autres revenus": {"category": "Übriges", "subcategory": "Other income"},
 }
 
 # Default merchant substring rules (case-insensitive). First match wins.

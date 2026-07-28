@@ -41,7 +41,7 @@ def classify_transactions(db: Session, txns: list[Transaction]) -> dict:
     """Assign category to each transaction in-place. Returns counts by method."""
     settings = get_settings()
     rules = db.scalars(select(MerchantRule).order_by(MerchantRule.priority)).all()
-    bank_map = {m.bank_category: m.category_name for m in db.scalars(select(BankCategoryMap)).all()}
+    bank_map = {m.bank_category: (m.category_name, m.subcategory) for m in db.scalars(select(BankCategoryMap)).all()}
     cat_by_name = {c.name: c for c in db.scalars(select(Category)).all()}
     expense_cat_names = [c.name for c in cat_by_name.values() if c.kind == "expense"]
 
@@ -58,12 +58,14 @@ def classify_transactions(db: Session, txns: list[Transaction]) -> dict:
             counts["rule"] += 1
             continue
 
-        # 2. bank category map
+        # 2. bank category map (carries a default subcategory too)
         mapped = bank_map.get(t.bank_category) if t.bank_category else None
-        if mapped and mapped in cat_by_name:
-            _assign(t, cat_by_name[mapped], None, "bank")
-            counts["bank"] += 1
-            continue
+        if mapped:
+            cat_name, sub = mapped
+            if cat_name and cat_name in cat_by_name:
+                _assign(t, cat_by_name[cat_name], sub, "bank")
+                counts["bank"] += 1
+                continue
 
         # 3. defer to AI, grouped by unique payee
         unresolved.setdefault(t.payee or "", []).append(t)

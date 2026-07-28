@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, CHF, type Dashboard, type SortKey } from "../api";
 import { PixelDragon } from "../components/PixelDragon";
 import { LifebarRow } from "../components/LifebarRow";
+import { CategoryDetailPanel } from "../components/CategoryDetailPanel";
 
 const SORTS: { key: SortKey; label: string }[] = [
   { key: "remaining", label: "Remaining" },
@@ -13,6 +14,7 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
   const [data, setData] = useState<Dashboard | null>(null);
   const [sort, setSort] = useState<SortKey>("remaining");
   const [error, setError] = useState<string | null>(null);
+  const [openCat, setOpenCat] = useState<number | null>(null);
 
   useEffect(() => {
     api.dashboard(sort).then(setData).catch((e) => setError(e.message));
@@ -58,9 +60,12 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
               No spending yet this month. Upload a statement to begin.
             </p>
           ) : (
-            data.lifebars.map((b) => <LifebarRow key={b.id} bar={b} />)
+            data.lifebars.map((b) => (
+              <LifebarRow key={b.id} bar={b} onClick={() => setOpenCat(openCat === b.id ? null : b.id)} />
+            ))
           )}
         </div>
+        {openCat !== null && <CategoryDetailPanel categoryId={openCat} onClose={() => setOpenCat(null)} />}
       </section>
     </>
   );

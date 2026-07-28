@@ -48,6 +48,11 @@ class Transaction(Base):
     dedup_hash: Mapped[str] = mapped_column(String(64), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
+    # Split support: a parent is excluded from all aggregations; its children
+    # (split_parent_id set) carry the real amounts and categories.
+    is_split: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    split_parent_id: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)
+
     category: Mapped[Category | None] = relationship(back_populates="transactions")
 
 
@@ -98,3 +103,14 @@ class Setting(Base):
 
     key: Mapped[str] = mapped_column(String(64), primary_key=True)
     value: Mapped[str] = mapped_column(Text, default="")
+
+
+class ActionLog(Base):
+    """Reversible record of a mutating action, for single-step undo.
+    `data` is JSON holding whatever the reverse needs (prior states, new ids)."""
+    __tablename__ = "action_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    kind: Mapped[str] = mapped_column(String(24))  # recategorize | bulk | split
+    data: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

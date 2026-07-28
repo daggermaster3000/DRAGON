@@ -62,6 +62,7 @@ export interface Transaction {
   needs_review: boolean;
   note: string | null;
   tags: string | null;
+  split_parent_id: number | null;
 }
 
 export interface Category {
@@ -129,6 +130,22 @@ export interface TxnQuery {
   limit?: number;
 }
 
+export interface SplitPart {
+  amount: number;
+  category_id: number;
+  subcategory?: string | null;
+  note?: string | null;
+}
+
+export interface CategoryDetail {
+  id: number;
+  name: string;
+  budget: number;
+  spent: number;
+  subcategories: { name: string; budget: number; spent: number }[];
+  transactions: { id: number; date: string; payee: string; amount: number; subcategory: string | null }[];
+}
+
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const detail = await res.json().catch(() => ({}));
@@ -193,6 +210,25 @@ export const api = {
 
   subscriptions: () =>
     fetch("/api/subscriptions").then(json<{ subscriptions: Subscription[]; total_monthly_equiv: number; count: number }>),
+
+  bulkRecategorize: (ids: number[], category_id: number) =>
+    fetch("/api/transactions/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, category_id }),
+    }).then(json<{ updated: number }>),
+
+  splitTransaction: (id: number, parts: SplitPart[]) =>
+    fetch(`/api/transactions/${id}/split`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ parts }),
+    }).then(json<{ parent_id: number; children: number }>),
+
+  undo: () => fetch("/api/transactions/undo", { method: "POST" }).then(json<{ undone: string }>),
+
+  categoryDetail: (categoryId: number) =>
+    fetch(`/api/budget/${categoryId}/detail`).then(json<CategoryDetail>),
 };
 
 export const CHF = (n: number) =>

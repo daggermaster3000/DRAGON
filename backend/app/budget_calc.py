@@ -24,7 +24,8 @@ def category_lifebars(db: Session, today: date | None = None) -> list[dict]:
 
     spent_rows = db.execute(
         select(Transaction.category_id, func.coalesce(func.sum(-Transaction.amount), 0.0))
-        .where(Transaction.amount < 0, Transaction.date >= start, Transaction.date < nxt)
+        .where(Transaction.amount < 0, Transaction.date >= start, Transaction.date < nxt,
+               Transaction.is_split.is_(False))
         .group_by(Transaction.category_id)
     ).all()
     spent_by_cat = {cid: float(total) for cid, total in spent_rows}
@@ -60,11 +61,13 @@ def month_summary(db: Session, today: date | None = None) -> dict:
     start, nxt = month_bounds(today)
     income = db.scalar(
         select(func.coalesce(func.sum(Transaction.amount), 0.0))
-        .where(Transaction.amount > 0, Transaction.date >= start, Transaction.date < nxt)
+        .where(Transaction.amount > 0, Transaction.date >= start, Transaction.date < nxt,
+               Transaction.is_split.is_(False))
     ) or 0.0
     expense = db.scalar(
         select(func.coalesce(func.sum(-Transaction.amount), 0.0))
-        .where(Transaction.amount < 0, Transaction.date >= start, Transaction.date < nxt)
+        .where(Transaction.amount < 0, Transaction.date >= start, Transaction.date < nxt,
+               Transaction.is_split.is_(False))
     ) or 0.0
     net = income - expense
     return {

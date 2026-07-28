@@ -57,6 +57,7 @@ class TransactionOut(BaseModel):
     needs_review: bool
     note: str | None
     tags: str | None
+    split_parent_id: int | None = None
 
 
 class TransactionUpdate(BaseModel):

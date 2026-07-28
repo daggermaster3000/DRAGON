@@ -6,7 +6,8 @@ never clobbers user edits to budgets or rules.
 import json
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select, text
+
 from sqlalchemy.orm import Session
 
 from .db import Base, SessionLocal, engine
@@ -14,8 +15,32 @@ from .models import BankCategoryMap, Category, DragonState, MerchantRule
 
 SEED_PATH = Path(__file__).resolve().parent / "seed" / "budget_seed.json"
 
+# Columns added after v0.1 — created on existing SQLite DBs that predate them.
+_ADDED_COLUMNS = {
+    "transactions": [
+        ("is_split", "BOOLEAN DEFAULT 0"),
+        ("split_parent_id", "INTEGER"),
+    ],
+}
+
+
+def _migrate(conn) -> None:
+    """Lightweight additive migration: create_all handles new tables; this adds
+    columns to tables that already exist (SQLite can't do that via create_all)."""
+    insp = inspect(conn)
+    existing_tables = set(insp.get_table_names())
+    for table, cols in _ADDED_COLUMNS.items():
+        if table not in existing_tables:
+            continue  # create_all just made it with all columns
+        have = {c["name"] for c in insp.get_columns(table)}
+        for name, ddl in cols:
+            if name not in have:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}"))
+
 
 def init_db() -> None:
+    with engine.begin() as conn:
+        _migrate(conn)
     Base.metadata.create_all(engine)
     with SessionLocal() as db:
         _seed(db)

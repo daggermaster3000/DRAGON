@@ -10,11 +10,15 @@ function barColor(pct: number, over: boolean): string {
   return "bg-hp-good";
 }
 
-export function LifebarRow({ bar }: { bar: Lifebar }) {
+export function LifebarRow({ bar, onClick }: { bar: Lifebar; onClick?: () => void }) {
   const fill = Math.min(100, bar.pct);
   const over = bar.over_budget;
   return (
-    <div className="py-2">
+    <div
+      className={`py-2 ${onClick ? "cursor-pointer -mx-2 rounded-lg px-2 hover:bg-black/[0.03]" : ""}`}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+    >
       <div className="mb-1 flex items-baseline justify-between">
         <span className="text-sm font-medium text-ink">{bar.name}</span>
         <span className={`text-xs tabular-nums ${over ? "font-semibold text-hp-danger" : "text-ink-soft"}`}>

@@ -24,7 +24,8 @@ def daily(
     start = date(year, month, 1)
     _, nxt = month_bounds(start)
     txns = db.scalars(
-        select(Transaction).where(Transaction.date >= start, Transaction.date < nxt)
+        select(Transaction).where(Transaction.date >= start, Transaction.date < nxt,
+                                  Transaction.is_split.is_(False))
     ).all()
     by_day: dict[str, dict] = {}
     for t in txns:
@@ -48,7 +49,7 @@ def daily(
 @router.get("/monthly")
 def monthly(months: int = Query(12, ge=1, le=60), db: Session = Depends(get_db)):
     """Income/expense/net per calendar month, most recent `months`."""
-    txns = db.scalars(select(Transaction)).all()
+    txns = db.scalars(select(Transaction).where(Transaction.is_split.is_(False))).all()
     buckets: dict[str, dict] = {}
     for t in txns:
         key = f"{t.date.year:04d}-{t.date.month:02d}"
@@ -81,7 +82,8 @@ def categories(
     rows = db.execute(
         select(Category.name, func.coalesce(func.sum(-Transaction.amount), 0.0))
         .join(Transaction, Transaction.category_id == Category.id)
-        .where(Transaction.amount < 0, Transaction.date >= start, Transaction.date < nxt)
+        .where(Transaction.amount < 0, Transaction.date >= start, Transaction.date < nxt,
+               Transaction.is_split.is_(False))
         .group_by(Category.name)
         .order_by(func.sum(-Transaction.amount))
     ).all()

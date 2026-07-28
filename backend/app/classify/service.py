@@ -73,7 +73,7 @@ def classify_transactions(db: Session, txns: list[Transaction]) -> dict:
 def reclassify_all(db: Session, include_manual: bool = False) -> dict:
     """Re-run the pipeline over stored transactions. Manual edits are preserved
     unless include_manual=True. Used after editing merchant rules."""
-    stmt = select(Transaction)
+    stmt = select(Transaction).where(Transaction.is_split.is_(False))
     if not include_manual:
         stmt = stmt.where(Transaction.classified_by != "manual")
     txns = db.scalars(stmt).all()

@@ -26,7 +26,10 @@ STAGE_THRESHOLDS = [
 
 
 def _cumulative_net(db: Session) -> float:
-    total = db.scalar(select(func.coalesce(func.sum(Transaction.amount), 0.0)))
+    total = db.scalar(
+        select(func.coalesce(func.sum(Transaction.amount), 0.0))
+        .where(Transaction.is_split.is_(False))
+    )
     return round(float(total or 0.0), 2)
 
 

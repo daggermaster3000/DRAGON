@@ -50,7 +50,8 @@ def _cadence(median_days: float):
 @router.get("")
 def detect(db: Session = Depends(get_db)):
     txns = db.scalars(
-        select(Transaction).options(joinedload(Transaction.category)).where(Transaction.amount < 0)
+        select(Transaction).options(joinedload(Transaction.category))
+        .where(Transaction.amount < 0, Transaction.is_split.is_(False))
     ).all()
 
     groups: dict[str, list[Transaction]] = {}

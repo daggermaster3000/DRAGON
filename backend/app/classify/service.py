@@ -70,6 +70,24 @@ def classify_transactions(db: Session, txns: list[Transaction]) -> dict:
     return counts
 
 
+def reclassify_all(db: Session, include_manual: bool = False) -> dict:
+    """Re-run the pipeline over stored transactions. Manual edits are preserved
+    unless include_manual=True. Used after editing merchant rules."""
+    stmt = select(Transaction)
+    if not include_manual:
+        stmt = stmt.where(Transaction.classified_by != "manual")
+    txns = db.scalars(stmt).all()
+    for t in txns:  # reset so the pipeline re-decides from scratch
+        t.category_id = None
+        t.subcategory = None
+        t.classified_by = "unclassified"
+        t.needs_review = False
+    counts = classify_transactions(db, txns)
+    db.commit()
+    counts["total"] = len(txns)
+    return counts
+
+
 def _assign(t: Transaction, cat: Category, sub: str | None, method: str) -> None:
     t.category_id = cat.id
     t.subcategory = sub

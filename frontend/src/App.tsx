@@ -5,14 +5,16 @@ import { DashboardView } from "./views/DashboardView";
 import { TransactionsView } from "./views/TransactionsView";
 import { CalendarView } from "./views/CalendarView";
 import { StatsView } from "./views/StatsView";
+import { RulesView } from "./views/RulesView";
 
-type Tab = "dashboard" | "transactions" | "calendar" | "stats";
+type Tab = "dashboard" | "transactions" | "calendar" | "stats" | "rules";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "dashboard", label: "🐉 Dashboard" },
   { key: "transactions", label: "Transactions" },
   { key: "calendar", label: "Calendar" },
   { key: "stats", label: "Stats" },
+  { key: "rules", label: "Rules" },
 ];
 
 export default function App() {
@@ -58,6 +60,7 @@ export default function App() {
       {tab === "transactions" && <TransactionsView refreshKey={refreshKey} />}
       {tab === "calendar" && <CalendarView refreshKey={refreshKey} />}
       {tab === "stats" && <StatsView refreshKey={refreshKey} />}
+      {tab === "rules" && <RulesView onReclassified={() => setRefreshKey((k) => k + 1)} />}
     </div>
   );
 }

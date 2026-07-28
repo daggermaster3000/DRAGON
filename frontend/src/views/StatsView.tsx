@@ -9,7 +9,7 @@ import {
   ArcElement,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
-import { api, CHF, type CategorySlice, type MonthPoint } from "../api";
+import { api, CHF, type CategorySlice, type MonthPoint, type Subscription } from "../api";
 import { ErrorBox } from "./DashboardView";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
@@ -21,14 +21,18 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
   const [monthly, setMonthly] = useState<MonthPoint[]>([]);
   const [cats, setCats] = useState<CategorySlice[]>([]);
   const [catMonth, setCatMonth] = useState<string>("");
+  const [subs, setSubs] = useState<Subscription[]>([]);
+  const [subTotal, setSubTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([api.statsMonthly(12), api.statsCategories()])
-      .then(([m, c]) => {
+    Promise.all([api.statsMonthly(12), api.statsCategories(), api.subscriptions()])
+      .then(([m, c, s]) => {
         setMonthly(m.series);
         setCats(c.items);
         setCatMonth(c.month);
+        setSubs(s.subscriptions);
+        setSubTotal(s.total_monthly_equiv);
       })
       .catch((e) => setError(e.message));
   }, [refreshKey]);
@@ -90,6 +94,36 @@ export function StatsView({ refreshKey }: { refreshKey: number }) {
             />
           </div>
         )}
+      </section>
+
+      <section className="rounded-2xl border border-black/10 bg-surface p-4">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold text-ink">Recurring payments</h2>
+          {subs.length > 0 && (
+            <span className="text-xs text-ink-muted">≈ {CHF(subTotal)}/mo across {subs.length}</span>
+          )}
+        </div>
+        {subs.length === 0 ? (
+          <Empty />
+        ) : (
+          <ul className="divide-y divide-black/5">
+            {subs.map((s) => (
+              <li key={s.normalized} className="flex items-center gap-3 py-2 text-sm">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-ink">{s.payee}</div>
+                  <div className="mt-0.5 text-[11px] text-ink-muted">
+                    {s.cadence} · {s.count}× · {s.category || "—"} · next ~{s.next_estimate}
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <div className="text-sm tabular-nums text-ink">{CHF(s.avg_amount)}</div>
+                  <div className="text-[11px] text-ink-muted">≈ {CHF(s.monthly_equiv)}/mo</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="mt-2 text-xs text-ink-muted">Detected from repeat charges with a steady cadence and amount. Eyeball — not every match is a true subscription.</p>
       </section>
     </div>
   );

@@ -91,6 +91,35 @@ export interface CategorySlice {
   amount: number;
 }
 
+export interface Rule {
+  id: number;
+  contains: string;
+  category_name: string;
+  subcategory: string | null;
+  priority: number;
+  source: string;
+}
+
+export interface ReclassifyCounts {
+  rule: number;
+  bank: number;
+  ai: number;
+  unclassified: number;
+  total: number;
+}
+
+export interface Subscription {
+  payee: string;
+  normalized: string;
+  cadence: string;
+  count: number;
+  avg_amount: number;
+  last_date: string;
+  next_estimate: string;
+  monthly_equiv: number;
+  category: string | null;
+}
+
 export interface TxnQuery {
   q?: string;
   category_id?: number;
@@ -147,6 +176,23 @@ export const api = {
 
   statsCategories: (year?: number, month?: number) =>
     fetch(`/api/stats/categories${qs({ year, month })}`).then(json<{ month: string; items: CategorySlice[] }>),
+
+  rules: () => fetch("/api/rules").then(json<Rule[]>),
+
+  createRule: (contains: string, category_name: string, subcategory?: string) =>
+    fetch("/api/rules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contains, category_name, subcategory: subcategory || null }),
+    }).then(json<Rule>),
+
+  deleteRule: (id: number) =>
+    fetch(`/api/rules/${id}`, { method: "DELETE" }).then(json<{ deleted: number }>),
+
+  applyRules: () => fetch("/api/rules/apply", { method: "POST" }).then(json<ReclassifyCounts>),
+
+  subscriptions: () =>
+    fetch("/api/subscriptions").then(json<{ subscriptions: Subscription[]; total_monthly_equiv: number; count: number }>),
 };
 
 export const CHF = (n: number) =>

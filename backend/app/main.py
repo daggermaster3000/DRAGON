@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .config import get_settings
-from .routes import dashboard, imports, stats, transactions
+from .routes import dashboard, imports, rules, stats, subscriptions, transactions
 from .seed_loader import init_db
 
 settings = get_settings()
@@ -27,6 +27,8 @@ app.include_router(imports.router)
 app.include_router(dashboard.router)
 app.include_router(transactions.router)
 app.include_router(stats.router)
+app.include_router(rules.router)
+app.include_router(subscriptions.router)
 
 
 @app.on_event("startup")

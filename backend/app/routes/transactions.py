@@ -84,7 +84,8 @@ def update_transaction(txn_id: int, patch: TransactionUpdate, db: Session = Depe
         t.classified_by = "manual"
         t.needs_review = False
     if patch.subcategory is not None:
-        t.subcategory = patch.subcategory
+        # Empty string clears the subcategory (e.g. when the category changes).
+        t.subcategory = patch.subcategory or None
     if patch.note is not None:
         t.note = patch.note
     if patch.tags is not None:

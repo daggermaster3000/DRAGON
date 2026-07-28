@@ -25,6 +25,12 @@ export function TransactionsView({ refreshKey }: { refreshKey: number }) {
   const [note, setNote] = useState<string | null>(null);
 
   const expenseCats = useMemo(() => cats.filter((c) => c.kind === "expense"), [cats]);
+  // category id -> its subcategory names (deduped for the picker)
+  const subsByCat = useMemo(() => {
+    const m: Record<number, string[]> = {};
+    for (const c of cats) m[c.id] = [...new Set(c.subcategories.map((s) => s.name))];
+    return m;
+  }, [cats]);
 
   useEffect(() => {
     api.categories().then(setCats).catch((e) => setError(e.message));
@@ -46,7 +52,13 @@ export function TransactionsView({ refreshKey }: { refreshKey: number }) {
   }, [q, reviewOnly, refreshKey, localRefresh]);
 
   async function changeCategory(id: number, category_id: number) {
-    const updated = await api.updateTransaction(id, { category_id });
+    // Switching category invalidates the old subcategory -> clear it ("" = clear).
+    const updated = await api.updateTransaction(id, { category_id, subcategory: "" });
+    setTxns((prev) => prev.map((t) => (t.id === id ? updated : t)));
+  }
+
+  async function changeSubcategory(id: number, subcategory: string) {
+    const updated = await api.updateTransaction(id, { subcategory });
     setTxns((prev) => prev.map((t) => (t.id === id ? updated : t)));
   }
 
@@ -130,19 +142,29 @@ export function TransactionsView({ refreshKey }: { refreshKey: number }) {
                       {t.amount >= 0 ? "+" : ""}{CHF(t.amount)}
                     </span>
                   </div>
-                  {/* line 2: date · status · category · split */}
-                  <div className="mt-1 flex items-center gap-1.5">
+                  {/* line 2: date · status · category · subcategory · split (wraps on mobile) */}
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
                     <span className="shrink-0 text-[10px] text-ink-muted tabular-nums">{t.date.slice(5)}</span>
                     <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] ${CLS_BADGE[t.classified_by] || "bg-black/5"}`}>{t.classified_by}</span>
                     {t.needs_review && <span className="shrink-0 text-[10px] text-hp-warn">●</span>}
                     <select
                       value={t.category_id ?? ""}
                       onChange={(e) => changeCategory(t.id, Number(e.target.value))}
-                      className="min-w-0 flex-1 rounded-md border border-black/10 bg-white px-2 py-1 text-xs text-ink-soft"
+                      className="min-w-[120px] flex-1 rounded-md border border-black/10 bg-white px-2 py-1 text-xs text-ink-soft"
                     >
                       <option value="" disabled>Uncategorized</option>
                       {expenseCats.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
+                    {t.category_id != null && (subsByCat[t.category_id]?.length ?? 0) > 0 && (
+                      <select
+                        value={t.subcategory ?? ""}
+                        onChange={(e) => changeSubcategory(t.id, e.target.value)}
+                        className="min-w-[120px] flex-1 rounded-md border border-black/10 bg-white px-2 py-1 text-xs text-ink-soft"
+                      >
+                        <option value="">— subcategory —</option>
+                        {subsByCat[t.category_id].map((n) => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    )}
                     {t.split_parent_id == null && (
                       <button onClick={() => setSplitTxn(t)} className="shrink-0 px-1 text-ink-muted hover:text-ink" title="Split">⑃</button>
                     )}

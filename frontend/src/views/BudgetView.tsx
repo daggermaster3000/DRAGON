@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api, CHF, type Category, type Subcategory } from "../api";
 import { ErrorBox } from "./DashboardView";
 import { TIMEFRAMES, type Timeframe } from "../theme";
+import { OracleModal } from "../components/OracleModal";
 
 const FACTOR: Record<Timeframe, number> = { monthly: 1, quarterly: 3, annual: 12 };
 const SUFFIX: Record<Timeframe, string> = { monthly: "/mo", quarterly: "/qtr", annual: "/yr" };
@@ -11,6 +12,7 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
+  const [oracle, setOracle] = useState(false);
   const factor = FACTOR[timeframe];
 
   function load() {
@@ -80,12 +82,20 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
             </button>
           ))}
         </div>
-        <button
-          onClick={resetToDefaults}
-          className="shrink-0 rounded-lg border border-black/10 px-3 py-1.5 text-xs text-ink-soft hover:bg-black/5"
-        >
-          ↺ Reset to tool defaults
-        </button>
+        <div className="flex gap-1.5">
+          <button
+            onClick={() => setOracle(true)}
+            className="shrink-0 rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-white hover:bg-ink/85"
+          >
+            🔮 Budget oracle
+          </button>
+          <button
+            onClick={resetToDefaults}
+            className="shrink-0 rounded-lg border border-black/10 px-3 py-1.5 text-xs text-ink-soft hover:bg-black/5"
+          >
+            ↺ Reset
+          </button>
+        </div>
       </div>
 
       <div className="mb-4 grid grid-cols-3 gap-2 sm:gap-3">
@@ -119,6 +129,13 @@ export function BudgetView({ onChanged }: { onChanged: () => void }) {
           <CategoryRow key={c.id} cat={c} factor={factor} suffix={SUFFIX[timeframe]} onRename={rename} onRemove={remove} onSaved={replaceCat} onError={setError} />
         ))}
       </div>
+
+      {oracle && (
+        <OracleModal
+          onClose={() => setOracle(false)}
+          onApplied={() => { setOracle(false); load(); onChanged(); }}
+        />
+      )}
     </div>
   );
 }

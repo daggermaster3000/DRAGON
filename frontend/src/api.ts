@@ -171,6 +171,30 @@ export interface Achievement {
   is_new: boolean;
 }
 
+export interface OracleInput {
+  income_monthly: number;
+  location?: string;
+  household?: string;
+  goals?: string;
+  savings_rate_target?: number | null;
+}
+
+export interface OracleItem {
+  category: string;
+  monthly_budget: number;
+  subcategories: Subcategory[];
+}
+
+export interface OracleProposal {
+  source: "ai" | "fallback";
+  rationale: string;
+  items: OracleItem[];
+  income_monthly: number;
+  total_expense: number;
+  planned_savings: number;
+  observed: Record<string, number>;
+}
+
 export type PlanStatus = "on_track" | "watch" | "off_track";
 
 export interface PlanHealth {
@@ -314,6 +338,20 @@ export const api = {
 
   resetBudget: () =>
     fetch("/api/categories/reset-budget", { method: "POST" }).then(json<{ updated: number; created: number }>),
+
+  oraclePropose: (input: OracleInput) =>
+    fetch("/api/budget/oracle", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    }).then(json<OracleProposal>),
+
+  oracleApply: (items: OracleItem[]) =>
+    fetch("/api/budget/oracle/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    }).then(json<{ applied: number }>),
 
   planHealth: () => fetch("/api/health/plan").then(json<PlanHealth>),
 

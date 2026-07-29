@@ -259,8 +259,8 @@ function qs(params: Record<string, unknown> | TxnQuery): string {
 }
 
 export const api = {
-  dashboard: (sort: SortKey = "remaining", timeframe = "monthly") =>
-    fetch(`/api/dashboard?sort=${sort}&timeframe=${timeframe}`).then(json<Dashboard>),
+  dashboard: (sort: SortKey = "remaining", timeframe = "monthly", year?: number, month?: number) =>
+    fetch(`/api/dashboard${qs({ sort, timeframe, year, month })}`).then(json<Dashboard>),
 
   statsSeries: (timeframe = "monthly", periods = 12) =>
     fetch(`/api/stats/series?timeframe=${timeframe}&periods=${periods}`).then(json<{ series: SeriesPoint[]; timeframe: string }>),
@@ -325,8 +325,8 @@ export const api = {
 
   undo: () => fetch("/api/transactions/undo", { method: "POST" }).then(json<{ undone: string }>),
 
-  categoryDetail: (categoryId: number, timeframe = "monthly") =>
-    fetch(`/api/budget/${categoryId}/detail?timeframe=${timeframe}`).then(json<CategoryDetail>),
+  categoryDetail: (categoryId: number, timeframe = "monthly", year?: number, month?: number) =>
+    fetch(`/api/budget/${categoryId}/detail${qs({ timeframe, year, month })}`).then(json<CategoryDetail>),
 
   createCategory: (name: string, monthly_budget: number, kind = "expense") =>
     fetch("/api/categories", {

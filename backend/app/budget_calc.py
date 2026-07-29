@@ -26,25 +26,33 @@ def _add_months(d: date, n: int) -> date:
     return date(d.year + m // 12, m % 12 + 1, 1)
 
 
-def period_bounds(timeframe: str = "monthly", today: date | None = None):
+def period_bounds(timeframe: str = "monthly", anchor: date | None = None):
     """Return (start, next, factor, elapsed_fraction, label) for the period that
-    contains `today`. factor scales monthly budgets to the period."""
-    today = today or date.today()
+    contains `anchor` (defaults to today). `anchor` selects *which* period; the
+    elapsed fraction is measured against the real current date, so a fully-past
+    period reports fraction 1.0 (no bogus projection) and a future one 0.0."""
+    anchor = anchor or date.today()
     if timeframe == "annual":
-        start = date(today.year, 1, 1)
-        nxt = date(today.year + 1, 1, 1)
-        label = str(today.year)
+        start = date(anchor.year, 1, 1)
+        nxt = date(anchor.year + 1, 1, 1)
+        label = str(anchor.year)
     elif timeframe == "quarterly":
-        q = (today.month - 1) // 3
-        start = date(today.year, q * 3 + 1, 1)
+        q = (anchor.month - 1) // 3
+        start = date(anchor.year, q * 3 + 1, 1)
         nxt = _add_months(start, 3)
-        label = f"Q{q + 1} {today.year}"
+        label = f"Q{q + 1} {anchor.year}"
     else:  # monthly
         timeframe = "monthly"
-        start, nxt = month_bounds(today)
-        label = today.strftime("%b %Y")
+        start, nxt = month_bounds(anchor)
+        label = anchor.strftime("%b %Y")
     total_days = (nxt - start).days
-    elapsed_days = min((today - start).days + 1, total_days)
+    now = date.today()
+    if now >= nxt:
+        elapsed_days = total_days           # period fully elapsed
+    elif now < start:
+        elapsed_days = 0                    # period hasn't started
+    else:
+        elapsed_days = (now - start).days + 1
     fraction = elapsed_days / total_days if total_days else 1.0
     return start, nxt, FACTOR[timeframe], fraction, label
 

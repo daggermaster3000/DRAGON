@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 import json
+from datetime import date
 
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -30,23 +31,34 @@ def _tf(timeframe: str) -> str:
     return timeframe if timeframe in TIMEFRAMES else "monthly"
 
 
+def _anchor(year: int | None, month: int | None):
+    """Build the date that selects which period to show (defaults to current)."""
+    if year:
+        m = min(max(month or 1, 1), 12)
+        return date(year, m, 1)
+    return None
+
+
 @router.get("/dashboard", response_model=DashboardOut)
 def dashboard(sort: str = Query("remaining"), timeframe: str = Query("monthly"),
+             year: int | None = Query(None), month: int | None = Query(None),
              db: Session = Depends(get_db)):
     tf = _tf(timeframe)
-    bars = category_lifebars(db, tf)
+    anchor = _anchor(year, month)
+    bars = category_lifebars(db, tf, anchor)
     bars.sort(key=SORTS.get(sort, SORTS["remaining"]))
     return DashboardOut(
-        summary=period_summary(db, tf),     # type: ignore[arg-type]
+        summary=period_summary(db, tf, anchor),   # type: ignore[arg-type]
         lifebars=[Lifebar(**b) for b in bars],
-        dragon=compute_dragon(db),          # type: ignore[arg-type]
+        dragon=compute_dragon(db),                # type: ignore[arg-type]
     )
 
 
 @router.get("/budget", response_model=list[Lifebar])
 def budget(sort: str = Query("remaining"), timeframe: str = Query("monthly"),
+           year: int | None = Query(None), month: int | None = Query(None),
            db: Session = Depends(get_db)):
-    bars = category_lifebars(db, _tf(timeframe))
+    bars = category_lifebars(db, _tf(timeframe), _anchor(year, month))
     bars.sort(key=SORTS.get(sort, SORTS["remaining"]))
     return [Lifebar(**b) for b in bars]
 
@@ -70,13 +82,15 @@ def categories(db: Session = Depends(get_db)):
 
 
 @router.get("/budget/{category_id}/detail")
-def category_detail(category_id: int, timeframe: str = Query("monthly"), db: Session = Depends(get_db)):
+def category_detail(category_id: int, timeframe: str = Query("monthly"),
+                    year: int | None = Query(None), month: int | None = Query(None),
+                    db: Session = Depends(get_db)):
     """Drill-down for a lifebar: per-subcategory budget vs spend + this-period
     transactions in the category. Budgets scale with the selected timeframe."""
     cat = db.get(Category, category_id)
     if not cat:
         raise HTTPException(404, "category not found")
-    start, nxt, factor, _fraction, _label = period_bounds(_tf(timeframe))
+    start, nxt, factor, _fraction, _label = period_bounds(_tf(timeframe), _anchor(year, month))
 
     txns = db.scalars(
         select(Transaction)

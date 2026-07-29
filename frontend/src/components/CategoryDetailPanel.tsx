@@ -23,11 +23,15 @@ function SubBar({ name, budget, spent }: { name: string; budget: number; spent: 
 export function CategoryDetailPanel({
   categoryId,
   timeframe = "monthly",
+  year,
+  month,
   onClose,
   onChanged,
 }: {
   categoryId: number;
   timeframe?: string;
+  year?: number;
+  month?: number;
   onClose: () => void;
   onChanged?: () => void;
 }) {
@@ -43,7 +47,7 @@ export function CategoryDetailPanel({
   }, [cats, categoryId]);
 
   function reload() {
-    api.categoryDetail(categoryId, timeframe).then(setDetail).catch((e) => setError(e.message));
+    api.categoryDetail(categoryId, timeframe, year, month).then(setDetail).catch((e) => setError(e.message));
   }
 
   useEffect(() => {
@@ -51,7 +55,7 @@ export function CategoryDetailPanel({
     setEditId(null);
     reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId, timeframe]);
+  }, [categoryId, timeframe, year, month]);
 
   useEffect(() => {
     api.categories().then(setCats).catch(() => setCats([]));

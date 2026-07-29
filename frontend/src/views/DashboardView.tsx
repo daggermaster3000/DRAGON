@@ -14,17 +14,34 @@ const SORTS: { key: SortKey; label: string }[] = [
 ];
 
 export function DashboardView({ refreshKey }: { refreshKey: number }) {
+  const now = new Date();
   const [data, setData] = useState<Dashboard | null>(null);
   const [sort, setSort] = useState<SortKey>("remaining");
   const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
+  // Anchor selecting which period to show (defaults to current month/year).
+  const [anchorY, setAnchorY] = useState(now.getFullYear());
+  const [anchorM, setAnchorM] = useState(now.getMonth() + 1);
   const [error, setError] = useState<string | null>(null);
   const [openCat, setOpenCat] = useState<number | null>(null);
   const [quip, setQuip] = useState<string | null>(null);
   const [quipLoading, setQuipLoading] = useState(false);
 
   useEffect(() => {
-    api.dashboard(sort, timeframe).then(setData).catch((e) => setError(e.message));
-  }, [sort, timeframe, refreshKey]);
+    api.dashboard(sort, timeframe, anchorY, anchorM).then(setData).catch((e) => setError(e.message));
+  }, [sort, timeframe, anchorY, anchorM, refreshKey]);
+
+  // Step the anchor by one unit of the current timeframe.
+  function shiftPeriod(delta: number) {
+    const step = timeframe === "annual" ? 12 : timeframe === "quarterly" ? 3 : 1;
+    const idx = anchorM - 1 + delta * step;
+    setAnchorY(anchorY + Math.floor(idx / 12));
+    setAnchorM(((idx % 12) + 12) % 12 + 1);
+  }
+  function resetToNow() {
+    setAnchorY(now.getFullYear());
+    setAnchorM(now.getMonth() + 1);
+  }
+  const isCurrent = anchorY === now.getFullYear() && anchorM === now.getMonth() + 1;
 
   // The dragon's roast loads independently (the LLM can be slow on a Pi).
   function loadQuip() {
@@ -44,7 +61,12 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
       <OnTrackCards refreshKey={refreshKey} />
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-        <span className="text-sm font-medium text-ink">{data.summary.period_label}</span>
+        <div className="flex items-center gap-1">
+          <button onClick={() => shiftPeriod(-1)} className="rounded-md px-2 py-1 text-sm text-ink-soft hover:bg-black/5" aria-label="previous period">‹</button>
+          <span className="min-w-[80px] text-center text-sm font-medium tabular-nums text-ink">{data.summary.period_label}</span>
+          <button onClick={() => shiftPeriod(1)} disabled={isCurrent} className="rounded-md px-2 py-1 text-sm text-ink-soft hover:bg-black/5 disabled:opacity-30" aria-label="next period">›</button>
+          {!isCurrent && <button onClick={resetToNow} className="ml-1 rounded-md px-2 py-1 text-[11px] text-ink-soft hover:bg-black/5">Today</button>}
+        </div>
         <div className="flex gap-1 rounded-lg border border-black/10 bg-surface p-0.5">
           {TIMEFRAMES.map((t) => (
             <button
@@ -109,8 +131,10 @@ export function DashboardView({ refreshKey }: { refreshKey: number }) {
           <CategoryDetailPanel
             categoryId={openCat}
             timeframe={timeframe}
+            year={anchorY}
+            month={anchorM}
             onClose={() => setOpenCat(null)}
-            onChanged={() => api.dashboard(sort, timeframe).then(setData).catch(() => {})}
+            onChanged={() => api.dashboard(sort, timeframe, anchorY, anchorM).then(setData).catch(() => {})}
           />
         )}
       </section>
